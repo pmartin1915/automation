@@ -19,7 +19,7 @@ function createWindow() {
       nodeIntegration: false,
       sandbox: false
     },
-    title: 'Claude Automation Platform',
+    title: 'Automation Station',
     show: false // Don't show until ready
   })
 

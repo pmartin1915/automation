@@ -86,16 +86,16 @@ test.describe('Automation Station App', () => {
     await window.click('text=Sessions')
     await window.waitForSelector('text=Track your development work sessions')
 
-    // Verify we're on Sessions page
-    const heading = await window.textContent('h1')
+    // Verify we're on Sessions page - look for Sessions h1 specifically in main content
+    const heading = await window.locator('main h1').textContent()
     expect(heading).toBe('Sessions')
 
     // Click on Settings page
     await window.click('text=Settings')
-    await window.waitForSelector('text=General Settings')
+    await window.waitForSelector('text=⚙️ Settings')
 
     // Verify we're on Settings page
-    const settingsHeading = await window.textContent('h1')
+    const settingsHeading = await window.locator('main h2').textContent()
     expect(settingsHeading).toContain('Settings')
 
     await electronApp.close()
@@ -119,12 +119,13 @@ test.describe('Automation Station App', () => {
     // Wait for Dashboard to load
     await window.waitForSelector('text=Projects', { timeout: 10000 })
 
-    // Check for empty state
-    const emptyState = await window.textContent('text=No Projects Yet')
+    // Check for empty state - wait for the h3 to appear
+    await window.waitForSelector('h3:has-text("No Projects Yet")', { timeout: 10000 })
+    const emptyState = await window.locator('h3:has-text("No Projects Yet")').textContent()
     expect(emptyState).toBeTruthy()
 
     // Verify Add Project button exists
-    const addButton = await window.textContent('button:has-text("Add Your First Project")')
+    const addButton = await window.isVisible('button:has-text("Add Your First Project")')
     expect(addButton).toBeTruthy()
 
     await electronApp.close()

@@ -71,7 +71,7 @@ test.describe('Visual Regression Tests', () => {
 
     // Navigate to Settings
     await window.click('text=Settings')
-    await window.waitForSelector('text=General Settings')
+    await window.waitForSelector('text=⚙️ Settings')
 
     // Take screenshot of settings page
     await expect(window).toHaveScreenshot('settings-page.png', {
