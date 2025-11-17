@@ -100,8 +100,8 @@ export class SessionService {
       createdAt: Date.now(),
       testRunIds: [],
       commitShas: [],
-      notes: sessionData.notes || '',
-      ...sessionData
+      ...sessionData,
+      notes: sessionData.notes || ''
     }
 
     this.sessions.set(session.id, session)
