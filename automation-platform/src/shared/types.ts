@@ -9,6 +9,7 @@ export interface Project {
   testCommand?: string
   branch?: string
   lastSession?: string
+  watchMode?: boolean  // Enable/disable file watching for auto-testing
   createdAt: string
   updatedAt: string
 }
@@ -95,6 +96,13 @@ export const IPC_CHANNELS = {
   TEST_COMPLETE: 'test:complete',
   TEST_ERROR: 'test:error',
   TEST_KILLED: 'test:killed',
+
+  // Watch mode operations
+  WATCH_START: 'watch:start',
+  WATCH_STOP: 'watch:stop',
+  WATCH_STARTED: 'watch:started',
+  WATCH_STOPPED: 'watch:stopped',
+  WATCH_TRIGGERED: 'watch:triggered',
 
   // Git operations
   GIT_STATUS: 'git:status',

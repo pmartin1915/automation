@@ -41,6 +41,8 @@
     "vite": "^7.2.2"
   },
   "dependencies": {
+    "chokidar": "^4.0.3",
+    "react-hot-toast": "^2.4.1",
     "simple-git": "^3.30.0",
     "zustand": "^5.0.8"
   }

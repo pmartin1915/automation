@@ -3,18 +3,22 @@ import { IPC_CHANNELS } from '../shared/types'
 import { getProjectManager } from './services/ProjectManager'
 import { getConfigStore } from './services/ConfigStore'
 import { getTestRunner } from './services/TestRunner'
+import { getFileWatcher } from './services/FileWatcher'
 
 let projectManager: ReturnType<typeof getProjectManager>
 let configStore: ReturnType<typeof getConfigStore>
 let testRunner: ReturnType<typeof getTestRunner>
+let fileWatcher: ReturnType<typeof getFileWatcher>
 
 export function setupIpcHandlers() {
   projectManager = getProjectManager()
   configStore = getConfigStore()
   testRunner = getTestRunner()
+  fileWatcher = getFileWatcher()
 
-  // Setup test runner event forwarding to renderer
+  // Setup event forwarding to renderer
   setupTestRunnerEvents()
+  setupFileWatcherEvents()
 
   // Project handlers
   ipcMain.handle(IPC_CHANNELS.PROJECT_GET_ALL, async () => {
@@ -53,6 +57,47 @@ export function setupIpcHandlers() {
 
   ipcMain.handle(IPC_CHANNELS.TEST_KILL, async (_event, projectId) => {
     return { success: testRunner.killTestProcess(projectId) }
+  })
+
+  // Watch mode handlers
+  ipcMain.handle(IPC_CHANNELS.WATCH_START, async (_event, projectId) => {
+    try {
+      const project = projectManager.getProject(projectId)
+      if (!project) {
+        return { success: false, error: 'Project not found' }
+      }
+
+      fileWatcher.startWatching({
+        projectId: project.id,
+        projectPath: project.path,
+        testFramework: project.testFramework,
+      })
+
+      // Update project watch mode
+      await projectManager.updateProject({ ...project, watchMode: true })
+
+      return { success: true }
+    } catch (error: any) {
+      console.error('Error starting watch mode:', error)
+      return { success: false, error: error.message }
+    }
+  })
+
+  ipcMain.handle(IPC_CHANNELS.WATCH_STOP, async (_event, projectId) => {
+    try {
+      await fileWatcher.stopWatching(projectId)
+
+      // Update project watch mode
+      const project = projectManager.getProject(projectId)
+      if (project) {
+        await projectManager.updateProject({ ...project, watchMode: false })
+      }
+
+      return { success: true }
+    } catch (error: any) {
+      console.error('Error stopping watch mode:', error)
+      return { success: false, error: error.message }
+    }
   })
 
   // Git handlers
@@ -168,4 +213,47 @@ function setupTestRunnerEvents() {
   })
 
   console.log('Test runner event forwarding setup')
+}
+
+/**
+ * Setup event forwarding from FileWatcher to renderer process
+ */
+function setupFileWatcherEvents() {
+  const sendToRenderer = (channel: string, data: any) => {
+    const windows = BrowserWindow.getAllWindows()
+    windows.forEach(window => {
+      window.webContents.send(channel, data)
+    })
+  }
+
+  // When files change, trigger test execution
+  fileWatcher.on('change', async (data) => {
+    const { projectId, filePath, eventType } = data
+    console.log(`[FileWatcher] File ${eventType}: ${filePath}, triggering tests for ${projectId}`)
+
+    // Notify renderer that watch was triggered
+    sendToRenderer(IPC_CHANNELS.WATCH_TRIGGERED, { projectId, filePath, eventType })
+
+    // Run tests for the project
+    try {
+      await testRunner.runTests(projectId)
+    } catch (error) {
+      console.error(`[FileWatcher] Error running tests for ${projectId}:`, error)
+    }
+  })
+
+  // Forward watcher status events
+  fileWatcher.on('ready', (data) => {
+    sendToRenderer(IPC_CHANNELS.WATCH_STARTED, data)
+  })
+
+  fileWatcher.on('stopped', (data) => {
+    sendToRenderer(IPC_CHANNELS.WATCH_STOPPED, data)
+  })
+
+  fileWatcher.on('error', (data) => {
+    console.error('[FileWatcher] Error:', data)
+  })
+
+  console.log('File watcher event forwarding setup')
 }

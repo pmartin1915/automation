@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import toast from 'react-hot-toast'
 import { useStore } from '../store/useStore'
 import type { Project } from '../../shared/types'
 
@@ -22,6 +23,9 @@ function Dashboard() {
 
     // Setup test event listeners
     setupTestListeners()
+
+    // Setup watch mode listeners
+    setupWatchListeners()
 
     // Cleanup on unmount
     return () => {
@@ -47,12 +51,33 @@ function Dashboard() {
     window.electronAPI.tests.onComplete((data) => {
       setTestResult(data.projectId, data.results)
       setTestRunning(data.projectId, false)
+
+      // Show toast notification
+      const project = projects.find(p => p.id === data.projectId)
+      const projectName = project?.name || 'Project'
+
+      if (data.results.failed > 0) {
+        toast.error(
+          `${projectName}: ${data.results.failed} test${data.results.failed > 1 ? 's' : ''} failed`,
+          { duration: 5000 }
+        )
+      } else if (data.results.passed > 0) {
+        toast.success(
+          `${projectName}: All ${data.results.passed} tests passed!`,
+          { duration: 4000 }
+        )
+      }
     })
 
     // Test error
     window.electronAPI.tests.onError((data) => {
       console.error('Test error:', data.error)
       setTestRunning(data.projectId, false)
+
+      // Show error toast
+      const project = projects.find(p => p.id === data.projectId)
+      const projectName = project?.name || 'Project'
+      toast.error(`${projectName}: Test error - ${data.error}`)
     })
 
     // Test killed
@@ -63,6 +88,35 @@ function Dashboard() {
 
   const cleanupTestListeners = () => {
     // Event listeners will be cleaned up by the preload script's removeListener
+  }
+
+  const setupWatchListeners = () => {
+    if (!window.electronAPI) return
+
+    // Watch mode started
+    window.electronAPI.watch.onStarted((data) => {
+      const project = projects.find(p => p.id === data.projectId)
+      const projectName = project?.name || 'Project'
+      toast.success(`${projectName}: Watch mode started`, { icon: '👁️' })
+    })
+
+    // Watch mode stopped
+    window.electronAPI.watch.onStopped((data) => {
+      const project = projects.find(p => p.id === data.projectId)
+      const projectName = project?.name || 'Project'
+      toast(`${projectName}: Watch mode stopped`, { icon: '⏸️' })
+    })
+
+    // Watch mode triggered
+    window.electronAPI.watch.onTriggered((data) => {
+      const project = projects.find(p => p.id === data.projectId)
+      const projectName = project?.name || 'Project'
+      const fileName = data.filePath.split('/').pop() || data.filePath
+      toast(`${projectName}: File changed (${fileName})`, {
+        icon: '🔄',
+        duration: 3000
+      })
+    })
   }
 
   const loadProjects = async () => {
@@ -95,6 +149,35 @@ function Dashboard() {
 
   const handleViewResults = (projectId: string) => {
     setSelectedProject(projectId)
+  }
+
+  const handleToggleWatch = async (project: Project) => {
+    try {
+      if (!window.electronAPI) return
+
+      if (project.watchMode) {
+        // Stop watching
+        const result = await window.electronAPI.watch.stop(project.id)
+        if (result.success) {
+          // Reload projects to update state
+          await loadProjects()
+        } else {
+          toast.error('Failed to stop watch mode')
+        }
+      } else {
+        // Start watching
+        const result = await window.electronAPI.watch.start(project.id)
+        if (result.success) {
+          // Reload projects to update state
+          await loadProjects()
+        } else {
+          toast.error('Failed to start watch mode')
+        }
+      }
+    } catch (error) {
+      console.error('Error toggling watch mode:', error)
+      toast.error('Error toggling watch mode')
+    }
   }
 
   return (
@@ -174,6 +257,27 @@ function Dashboard() {
                     </span>
                   </div>
                 )}
+
+                {/* Watch Mode Toggle */}
+                <div className="flex items-center justify-between text-sm py-2 px-3 bg-accent/30 rounded border border-border">
+                  <span className="text-muted-foreground flex items-center gap-2">
+                    {project.watchMode ? '👁️' : '⏸️'}
+                    Watch Mode
+                  </span>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      handleToggleWatch(project)
+                    }}
+                    className={`px-2 py-1 text-xs rounded transition ${
+                      project.watchMode
+                        ? 'bg-green-500/20 text-green-500 hover:bg-green-500/30'
+                        : 'bg-muted hover:bg-accent'
+                    }`}
+                  >
+                    {project.watchMode ? 'ON' : 'OFF'}
+                  </button>
+                </div>
 
                 <div className="flex gap-2 mt-4">
                   <button

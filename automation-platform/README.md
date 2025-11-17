@@ -4,7 +4,7 @@
 
 ## Project Status
 
-**Week 3 of Implementation: COMPLETE ✅**
+**Week 4 of Implementation: COMPLETE ✅**
 
 ### What's Built
 
@@ -39,17 +39,32 @@
 - ✅ Test timeout handling (5 min default)
 - ✅ Kill test process functionality
 
+**Week 4 - File Watching & Live Updates:**
+- ✅ FileWatcher service with chokidar integration
+- ✅ Debounced test execution (500ms default)
+- ✅ Watch mode toggle per project (ON/OFF)
+- ✅ Auto-run tests on file changes
+- ✅ Smart file pattern matching by framework
+- ✅ Performance optimizations (ignore node_modules, .git, etc.)
+- ✅ Toast notification system (react-hot-toast)
+- ✅ Real-time notifications for test results
+- ✅ Watch mode status notifications
+- ✅ File change notifications with filename
+
 ### Current Capabilities
 
 - Add projects via UI (validates path, detects language/framework)
 - **Run tests for any project with one click**
 - **Real-time test output streaming to UI**
 - **View detailed test results with pass/fail breakdown**
+- **Watch mode: Auto-run tests on file changes** 👁️
+- **Toast notifications for test results and watch events** 🔔
 - View all projects in dashboard
 - Projects saved to disk and loaded on startup
 - Auto-detection of JavaScript/TypeScript, Python, Go, Rust
 - Auto-detection of Jest, Vitest, Pytest, Cargo test, Go test
 - **Live test status per project (❓ → 🔄 → ✅/❌)**
+- **Debounced test execution to prevent spam**
 - Clean, modern interface with dark mode support
 - Fully typed TypeScript codebase
 
@@ -131,24 +146,24 @@ automation-platform/
 └── package.json                # Dependencies and scripts
 ```
 
-## Next Steps (Week 4)
+## Next Steps (Week 5)
 
 According to the [Implementation Roadmap](/home/user/automation/docs/IMPLEMENTATION_ROADMAP.md):
 
-### Week 4: Test Watching & Live Updates
+### Week 5: Git Integration (Phase 1)
 
 **Goals:**
-- Implement test file watching for continuous testing
-- Auto-run tests on file changes
-- Debounced test execution
-- Toast notifications for test results
+- Implement basic Git operations using simple-git
+- Display Git status in project cards
+- Branch management UI
+- Commit and push functionality
 
 **Tasks:**
-- [ ] File watcher service (chokidar)
-- [ ] Debounced test runner
-- [ ] Watch mode toggle per project
-- [ ] Toast notifications for test completion
-- [ ] Performance optimizations for large projects
+- [ ] Git service wrapper around simple-git
+- [ ] Git status display (branch, ahead/behind, dirty state)
+- [ ] Branch creation and switching UI
+- [ ] Commit functionality with message input
+- [ ] Push/pull operations
 
 ## Documentation
 

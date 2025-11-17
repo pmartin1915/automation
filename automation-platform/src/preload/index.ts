@@ -51,6 +51,29 @@ const api = {
     }
   },
 
+  // Watch mode operations
+  watch: {
+    start: (projectId: string) =>
+      ipcRenderer.invoke(IPC_CHANNELS.WATCH_START, projectId),
+    stop: (projectId: string) =>
+      ipcRenderer.invoke(IPC_CHANNELS.WATCH_STOP, projectId),
+    onStarted: (callback: (data: { projectId: string }) => void) => {
+      const listener = (_event: any, data: any) => callback(data)
+      ipcRenderer.on(IPC_CHANNELS.WATCH_STARTED, listener)
+      return () => ipcRenderer.removeListener(IPC_CHANNELS.WATCH_STARTED, listener)
+    },
+    onStopped: (callback: (data: { projectId: string }) => void) => {
+      const listener = (_event: any, data: any) => callback(data)
+      ipcRenderer.on(IPC_CHANNELS.WATCH_STOPPED, listener)
+      return () => ipcRenderer.removeListener(IPC_CHANNELS.WATCH_STOPPED, listener)
+    },
+    onTriggered: (callback: (data: { projectId: string; filePath: string; eventType: string }) => void) => {
+      const listener = (_event: any, data: any) => callback(data)
+      ipcRenderer.on(IPC_CHANNELS.WATCH_TRIGGERED, listener)
+      return () => ipcRenderer.removeListener(IPC_CHANNELS.WATCH_TRIGGERED, listener)
+    }
+  },
+
   // Git operations
   git: {
     status: (projectPath: string) =>

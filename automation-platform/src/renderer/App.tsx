@@ -1,9 +1,34 @@
 import { useState } from 'react'
+import { Toaster } from 'react-hot-toast'
 import Dashboard from './pages/Dashboard'
 
 function App() {
   return (
     <div className="h-screen w-screen flex flex-col overflow-hidden bg-background text-foreground">
+      {/* Toast notifications */}
+      <Toaster
+        position="bottom-right"
+        toastOptions={{
+          duration: 4000,
+          style: {
+            background: '#1e293b',
+            color: '#f1f5f9',
+            border: '1px solid #334155',
+          },
+          success: {
+            iconTheme: {
+              primary: '#10b981',
+              secondary: '#f1f5f9',
+            },
+          },
+          error: {
+            iconTheme: {
+              primary: '#ef4444',
+              secondary: '#f1f5f9',
+            },
+          },
+        }}
+      />
       {/* Header */}
       <header className="h-14 border-b border-border flex items-center px-6 bg-card">
         <div className="flex items-center gap-3">
