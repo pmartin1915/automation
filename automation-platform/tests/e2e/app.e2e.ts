@@ -8,13 +8,21 @@ import path from 'path'
 
 test.describe('Automation Station App', () => {
   test('should launch electron app and show main window', async () => {
-    // Launch Electron app
+    // Launch Electron app with NODE_ENV=test to prevent DevTools from opening
     const electronApp = await electron.launch({
       args: [path.join(__dirname, '../../dist/main/index.js')],
+      env: {
+        ...process.env,
+        NODE_ENV: 'test',
+      },
     })
 
     // Wait for the first window
     const window = await electronApp.firstWindow()
+
+    // Wait for DOM to be ready and React to mount
+    await window.waitForLoadState('domcontentloaded')
+    await window.waitForTimeout(2000)
 
     // Verify window title
     const title = await window.title()
@@ -30,12 +38,20 @@ test.describe('Automation Station App', () => {
   test('should display branding correctly', async () => {
     const electronApp = await electron.launch({
       args: [path.join(__dirname, '../../dist/main/index.js')],
+      env: {
+        ...process.env,
+        NODE_ENV: 'test',
+      },
     })
 
     const window = await electronApp.firstWindow()
 
+    // Wait for DOM and React
+    await window.waitForLoadState('domcontentloaded')
+    await window.waitForTimeout(2000)
+
     // Wait for app to load
-    await window.waitForSelector('text=Automation Station')
+    await window.waitForSelector('text=Automation Station', { timeout: 10000 })
 
     // Verify header text exists
     const header = await window.textContent('h1')
@@ -51,12 +67,20 @@ test.describe('Automation Station App', () => {
   test('should navigate between pages', async () => {
     const electronApp = await electron.launch({
       args: [path.join(__dirname, '../../dist/main/index.js')],
+      env: {
+        ...process.env,
+        NODE_ENV: 'test',
+      },
     })
 
     const window = await electronApp.firstWindow()
 
+    // Wait for DOM and React
+    await window.waitForLoadState('domcontentloaded')
+    await window.waitForTimeout(2000)
+
     // Wait for sidebar to load
-    await window.waitForSelector('nav')
+    await window.waitForSelector('nav', { timeout: 10000 })
 
     // Click on Sessions page
     await window.click('text=Sessions')
@@ -80,12 +104,20 @@ test.describe('Automation Station App', () => {
   test('should show empty state when no projects exist', async () => {
     const electronApp = await electron.launch({
       args: [path.join(__dirname, '../../dist/main/index.js')],
+      env: {
+        ...process.env,
+        NODE_ENV: 'test',
+      },
     })
 
     const window = await electronApp.firstWindow()
 
+    // Wait for DOM and React
+    await window.waitForLoadState('domcontentloaded')
+    await window.waitForTimeout(2000)
+
     // Wait for Dashboard to load
-    await window.waitForSelector('text=Projects')
+    await window.waitForSelector('text=Projects', { timeout: 10000 })
 
     // Check for empty state
     const emptyState = await window.textContent('text=No Projects Yet')
@@ -101,12 +133,20 @@ test.describe('Automation Station App', () => {
   test('should show keyboard shortcuts modal', async () => {
     const electronApp = await electron.launch({
       args: [path.join(__dirname, '../../dist/main/index.js')],
+      env: {
+        ...process.env,
+        NODE_ENV: 'test',
+      },
     })
 
     const window = await electronApp.firstWindow()
 
+    // Wait for DOM and React
+    await window.waitForLoadState('domcontentloaded')
+    await window.waitForTimeout(2000)
+
     // Wait for shortcuts button
-    await window.waitForSelector('text=Shortcuts')
+    await window.waitForSelector('text=Shortcuts', { timeout: 10000 })
 
     // Click shortcuts button
     await window.click('button:has-text("Shortcuts")')

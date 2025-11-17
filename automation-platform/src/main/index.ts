@@ -30,7 +30,11 @@ function createWindow() {
   if (isDev) {
     // Development: load from Vite dev server
     mainWindow.loadURL('http://localhost:5173')
-    mainWindow.webContents.openDevTools()
+
+    // Only open DevTools in development mode, not during tests
+    if (process.env.NODE_ENV !== 'test') {
+      mainWindow.webContents.openDevTools()
+    }
   } else {
     // Production: load from built files
     mainWindow.loadFile(path.join(__dirname, '../renderer/index.html'))

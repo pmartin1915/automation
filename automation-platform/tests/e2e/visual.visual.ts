@@ -12,10 +12,16 @@ test.describe('Visual Regression Tests', () => {
   test('dashboard page appearance @visual', async () => {
     const electronApp = await electron.launch({
       args: [path.join(__dirname, '../../dist/main/index.js')],
+      env: {
+        ...process.env,
+        NODE_ENV: 'test',
+      },
     })
 
     const window = await electronApp.firstWindow()
-    await window.waitForSelector('text=Projects')
+    await window.waitForLoadState('domcontentloaded')
+    await window.waitForTimeout(2000)
+    await window.waitForSelector('text=Projects', { timeout: 10000 })
 
     // Take screenshot of dashboard
     await expect(window).toHaveScreenshot('dashboard-empty-state.png', {
@@ -28,9 +34,15 @@ test.describe('Visual Regression Tests', () => {
   test('sessions page appearance @visual', async () => {
     const electronApp = await electron.launch({
       args: [path.join(__dirname, '../../dist/main/index.js')],
+      env: {
+        ...process.env,
+        NODE_ENV: 'test',
+      },
     })
 
     const window = await electronApp.firstWindow()
+    await window.waitForLoadState('domcontentloaded')
+    await window.waitForTimeout(2000)
 
     // Navigate to Sessions
     await window.click('text=Sessions')
@@ -47,9 +59,15 @@ test.describe('Visual Regression Tests', () => {
   test('settings page appearance @visual', async () => {
     const electronApp = await electron.launch({
       args: [path.join(__dirname, '../../dist/main/index.js')],
+      env: {
+        ...process.env,
+        NODE_ENV: 'test',
+      },
     })
 
     const window = await electronApp.firstWindow()
+    await window.waitForLoadState('domcontentloaded')
+    await window.waitForTimeout(2000)
 
     // Navigate to Settings
     await window.click('text=Settings')
@@ -66,9 +84,15 @@ test.describe('Visual Regression Tests', () => {
   test('sidebar navigation hover states @visual', async () => {
     const electronApp = await electron.launch({
       args: [path.join(__dirname, '../../dist/main/index.js')],
+      env: {
+        ...process.env,
+        NODE_ENV: 'test',
+      },
     })
 
     const window = await electronApp.firstWindow()
+    await window.waitForLoadState('domcontentloaded')
+    await window.waitForTimeout(2000)
 
     // Hover over Sessions nav item
     await window.hover('button:has-text("Sessions")')
@@ -85,9 +109,15 @@ test.describe('Visual Regression Tests', () => {
   test('keyboard shortcuts modal appearance @visual', async () => {
     const electronApp = await electron.launch({
       args: [path.join(__dirname, '../../dist/main/index.js')],
+      env: {
+        ...process.env,
+        NODE_ENV: 'test',
+      },
     })
 
     const window = await electronApp.firstWindow()
+    await window.waitForLoadState('domcontentloaded')
+    await window.waitForTimeout(2000)
 
     // Open shortcuts modal
     await window.click('button:has-text("Shortcuts")')
@@ -104,10 +134,16 @@ test.describe('Visual Regression Tests', () => {
   test('responsive layout at different sizes @visual', async () => {
     const electronApp = await electron.launch({
       args: [path.join(__dirname, '../../dist/main/index.js')],
+      env: {
+        ...process.env,
+        NODE_ENV: 'test',
+      },
     })
 
     const window = await electronApp.firstWindow()
-    await window.waitForSelector('text=Projects')
+    await window.waitForLoadState('domcontentloaded')
+    await window.waitForTimeout(2000)
+    await window.waitForSelector('text=Projects', { timeout: 10000 })
 
     // Test at 1920x1080 (Full HD)
     await window.setViewportSize({ width: 1920, height: 1080 })
