@@ -76,19 +76,19 @@ const api = {
 
   // Git operations
   git: {
-    status: (projectPath: string) =>
+    status: (projectPath: string): Promise<GitStatus | null> =>
       ipcRenderer.invoke(IPC_CHANNELS.GIT_STATUS, projectPath),
-    commit: (projectPath: string, message: string) =>
-      ipcRenderer.invoke(IPC_CHANNELS.GIT_COMMIT, { projectPath, message }),
-    push: (projectPath: string) =>
-      ipcRenderer.invoke(IPC_CHANNELS.GIT_PUSH, projectPath),
-    pull: (projectPath: string) =>
-      ipcRenderer.invoke(IPC_CHANNELS.GIT_PULL, projectPath),
-    createBranch: (projectPath: string, branchName: string) =>
-      ipcRenderer.invoke(IPC_CHANNELS.GIT_CREATE_BRANCH, { projectPath, branchName }),
-    switchBranch: (projectPath: string, branchName: string) =>
+    commit: (projectPath: string, message: string, files?: string[]): Promise<{ success: boolean; error?: string }> =>
+      ipcRenderer.invoke(IPC_CHANNELS.GIT_COMMIT, { projectPath, message, files }),
+    push: (projectPath: string, remote?: string, branch?: string): Promise<{ success: boolean; error?: string }> =>
+      ipcRenderer.invoke(IPC_CHANNELS.GIT_PUSH, { projectPath, remote, branch }),
+    pull: (projectPath: string, remote?: string, branch?: string): Promise<{ success: boolean; error?: string }> =>
+      ipcRenderer.invoke(IPC_CHANNELS.GIT_PULL, { projectPath, remote, branch }),
+    createBranch: (projectPath: string, branchName: string, checkout?: boolean): Promise<{ success: boolean; error?: string }> =>
+      ipcRenderer.invoke(IPC_CHANNELS.GIT_CREATE_BRANCH, { projectPath, branchName, checkout }),
+    switchBranch: (projectPath: string, branchName: string): Promise<{ success: boolean; error?: string }> =>
       ipcRenderer.invoke(IPC_CHANNELS.GIT_SWITCH_BRANCH, { projectPath, branchName }),
-    getBranches: (projectPath: string) =>
+    getBranches: (projectPath: string): Promise<{ local: string[]; remote: string[]; current: string }> =>
       ipcRenderer.invoke(IPC_CHANNELS.GIT_GET_BRANCHES, projectPath)
   },
 

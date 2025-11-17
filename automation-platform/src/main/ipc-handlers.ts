@@ -4,6 +4,7 @@ import { getProjectManager } from './services/ProjectManager'
 import { getConfigStore } from './services/ConfigStore'
 import { getTestRunner } from './services/TestRunner'
 import { getFileWatcher } from './services/FileWatcher'
+import { gitService } from './services/GitService'
 
 let projectManager: ReturnType<typeof getProjectManager>
 let configStore: ReturnType<typeof getConfigStore>
@@ -102,45 +103,73 @@ export function setupIpcHandlers() {
 
   // Git handlers
   ipcMain.handle(IPC_CHANNELS.GIT_STATUS, async (_event, projectPath) => {
-    // TODO: Implement
-    console.log('Get git status:', projectPath)
-    return null
+    try {
+      const status = await gitService.getStatus(projectPath)
+      return status
+    } catch (error: any) {
+      console.error('Error getting git status:', error)
+      return null
+    }
   })
 
-  ipcMain.handle(IPC_CHANNELS.GIT_COMMIT, async (_event, { projectPath, message }) => {
-    // TODO: Implement
-    console.log('Git commit:', projectPath, message)
-    return { success: true }
+  ipcMain.handle(IPC_CHANNELS.GIT_COMMIT, async (_event, { projectPath, message, files }) => {
+    try {
+      const success = await gitService.commit(projectPath, message, files)
+      return { success }
+    } catch (error: any) {
+      console.error('Error committing:', error)
+      return { success: false, error: error.message }
+    }
   })
 
-  ipcMain.handle(IPC_CHANNELS.GIT_PUSH, async (_event, projectPath) => {
-    // TODO: Implement
-    console.log('Git push:', projectPath)
-    return { success: true }
+  ipcMain.handle(IPC_CHANNELS.GIT_PUSH, async (_event, { projectPath, remote, branch }) => {
+    try {
+      const success = await gitService.push(projectPath, remote, branch)
+      return { success }
+    } catch (error: any) {
+      console.error('Error pushing:', error)
+      return { success: false, error: error.message }
+    }
   })
 
-  ipcMain.handle(IPC_CHANNELS.GIT_PULL, async (_event, projectPath) => {
-    // TODO: Implement
-    console.log('Git pull:', projectPath)
-    return { success: true }
+  ipcMain.handle(IPC_CHANNELS.GIT_PULL, async (_event, { projectPath, remote, branch }) => {
+    try {
+      const success = await gitService.pull(projectPath, remote, branch)
+      return { success }
+    } catch (error: any) {
+      console.error('Error pulling:', error)
+      return { success: false, error: error.message }
+    }
   })
 
-  ipcMain.handle(IPC_CHANNELS.GIT_CREATE_BRANCH, async (_event, { projectPath, branchName }) => {
-    // TODO: Implement
-    console.log('Create branch:', projectPath, branchName)
-    return { success: true }
+  ipcMain.handle(IPC_CHANNELS.GIT_CREATE_BRANCH, async (_event, { projectPath, branchName, checkout }) => {
+    try {
+      const success = await gitService.createBranch(projectPath, branchName, checkout)
+      return { success }
+    } catch (error: any) {
+      console.error('Error creating branch:', error)
+      return { success: false, error: error.message }
+    }
   })
 
   ipcMain.handle(IPC_CHANNELS.GIT_SWITCH_BRANCH, async (_event, { projectPath, branchName }) => {
-    // TODO: Implement
-    console.log('Switch branch:', projectPath, branchName)
-    return { success: true }
+    try {
+      const success = await gitService.switchBranch(projectPath, branchName)
+      return { success }
+    } catch (error: any) {
+      console.error('Error switching branch:', error)
+      return { success: false, error: error.message }
+    }
   })
 
   ipcMain.handle(IPC_CHANNELS.GIT_GET_BRANCHES, async (_event, projectPath) => {
-    // TODO: Implement
-    console.log('Get branches:', projectPath)
-    return []
+    try {
+      const branches = await gitService.getBranches(projectPath)
+      return branches
+    } catch (error: any) {
+      console.error('Error getting branches:', error)
+      return { local: [], remote: [], current: '' }
+    }
   })
 
   // Config handlers

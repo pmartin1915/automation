@@ -4,7 +4,7 @@
 
 ## Project Status
 
-**Week 4 of Implementation: COMPLETE ✅**
+**Week 5 of Implementation: COMPLETE ✅**
 
 ### What's Built
 
@@ -51,6 +51,18 @@
 - ✅ Watch mode status notifications
 - ✅ File change notifications with filename
 
+**Week 5 - Git Integration:**
+- ✅ GitService wrapper around simple-git
+- ✅ Git status detection (branch, dirty state, ahead/behind)
+- ✅ Git status display in project cards
+- ✅ Visual indicators for uncommitted changes
+- ✅ Commit modal with message input
+- ✅ Branch creation and switching UI
+- ✅ Push/pull functionality with toast notifications
+- ✅ Automatic Git status refresh after operations
+- ✅ Branch management modal (switch/create)
+- ✅ Full IPC handlers for all Git operations
+
 ### Current Capabilities
 
 - Add projects via UI (validates path, detects language/framework)
@@ -59,6 +71,11 @@
 - **View detailed test results with pass/fail breakdown**
 - **Watch mode: Auto-run tests on file changes** 👁️
 - **Toast notifications for test results and watch events** 🔔
+- **Git integration with status display** 🌿
+- **View Git status: branch, uncommitted changes, ahead/behind**
+- **Commit changes with custom message**
+- **Push and pull with one click**
+- **Create and switch branches from UI**
 - View all projects in dashboard
 - Projects saved to disk and loaded on startup
 - Auto-detection of JavaScript/TypeScript, Python, Go, Rust
@@ -75,7 +92,9 @@
 - **Build Tool:** Vite 7
 - **Styling:** Tailwind CSS 4 + shadcn/ui
 - **State Management:** Zustand ✅
-- **Git Operations:** simple-git (coming in Week 5)
+- **Git Operations:** simple-git ✅
+- **File Watching:** chokidar ✅
+- **Notifications:** react-hot-toast ✅
 
 ## Development
 
@@ -146,24 +165,22 @@ automation-platform/
 └── package.json                # Dependencies and scripts
 ```
 
-## Next Steps (Week 5)
+## Next Steps (Week 6)
 
-According to the [Implementation Roadmap](/home/user/automation/docs/IMPLEMENTATION_ROADMAP.md):
-
-### Week 5: Git Integration (Phase 1)
+### Week 6: Session Management & Workflow Automation
 
 **Goals:**
-- Implement basic Git operations using simple-git
-- Display Git status in project cards
-- Branch management UI
-- Commit and push functionality
+- Implement session tracking for development work
+- Link sessions to Git branches and test runs
+- Add session notes and outcome tracking
+- Create session history view
 
-**Tasks:**
-- [ ] Git service wrapper around simple-git
-- [ ] Git status display (branch, ahead/behind, dirty state)
-- [ ] Branch creation and switching UI
-- [ ] Commit functionality with message input
-- [ ] Push/pull operations
+**Potential Tasks:**
+- [ ] Session service for CRUD operations
+- [ ] Session UI in dashboard (create, view, update)
+- [ ] Link sessions to branches and test results
+- [ ] Session notes and outcome tracking
+- [ ] Session history timeline view
 
 ## Documentation
 

@@ -10,6 +10,7 @@ export interface Project {
   branch?: string
   lastSession?: string
   watchMode?: boolean  // Enable/disable file watching for auto-testing
+  gitStatus?: GitStatus  // Cached Git status
   createdAt: string
   updatedAt: string
 }

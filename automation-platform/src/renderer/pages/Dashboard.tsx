@@ -16,6 +16,10 @@ function Dashboard() {
   } = useStore()
   const [showAddModal, setShowAddModal] = useState(false)
   const [selectedProject, setSelectedProject] = useState<string | null>(null)
+  const [showCommitModal, setShowCommitModal] = useState(false)
+  const [showBranchModal, setShowBranchModal] = useState(false)
+  const [commitProjectId, setCommitProjectId] = useState<string | null>(null)
+  const [branchProjectId, setBranchProjectId] = useState<string | null>(null)
 
   useEffect(() => {
     // Load projects from Electron API on mount
@@ -123,7 +127,21 @@ function Dashboard() {
     try {
       if (window.electronAPI) {
         const loadedProjects = await window.electronAPI.projects.getAll()
-        setProjects(loadedProjects)
+
+        // Fetch Git status for each project
+        const projectsWithGitStatus = await Promise.all(
+          loadedProjects.map(async (project) => {
+            try {
+              const gitStatus = await window.electronAPI.git.status(project.path)
+              return { ...project, gitStatus }
+            } catch (error) {
+              console.error(`Failed to get git status for ${project.name}:`, error)
+              return project
+            }
+          })
+        )
+
+        setProjects(projectsWithGitStatus)
       }
     } catch (error) {
       console.error('Failed to load projects:', error)
@@ -177,6 +195,54 @@ function Dashboard() {
     } catch (error) {
       console.error('Error toggling watch mode:', error)
       toast.error('Error toggling watch mode')
+    }
+  }
+
+  const handleCommit = (projectId: string) => {
+    setCommitProjectId(projectId)
+    setShowCommitModal(true)
+  }
+
+  const handleManageBranches = (projectId: string) => {
+    setBranchProjectId(projectId)
+    setShowBranchModal(true)
+  }
+
+  const handlePush = async (project: Project) => {
+    try {
+      if (!window.electronAPI || !project.gitStatus) return
+
+      toast.loading(`${project.name}: Pushing to remote...`)
+      const result = await window.electronAPI.git.push(project.path)
+
+      if (result.success) {
+        toast.success(`${project.name}: Pushed successfully!`)
+        await loadProjects()
+      } else {
+        toast.error(`${project.name}: Push failed - ${result.error}`)
+      }
+    } catch (error) {
+      console.error('Error pushing:', error)
+      toast.error(`${project.name}: Push error`)
+    }
+  }
+
+  const handlePull = async (project: Project) => {
+    try {
+      if (!window.electronAPI || !project.gitStatus) return
+
+      toast.loading(`${project.name}: Pulling from remote...`)
+      const result = await window.electronAPI.git.pull(project.path)
+
+      if (result.success) {
+        toast.success(`${project.name}: Pulled successfully!`)
+        await loadProjects()
+      } else {
+        toast.error(`${project.name}: Pull failed - ${result.error}`)
+      }
+    } catch (error) {
+      console.error('Error pulling:', error)
+      toast.error(`${project.name}: Pull error`)
     }
   }
 
@@ -239,10 +305,38 @@ function Dashboard() {
                   <span className="font-mono text-xs">{project.testFramework}</span>
                 </div>
 
-                {project.branch && (
+                {project.gitStatus && (
                   <div className="flex items-center justify-between text-sm">
                     <span className="text-muted-foreground">Branch</span>
-                    <span className="font-mono text-xs">{project.branch}</span>
+                    <span className="font-mono text-xs">{project.gitStatus.branch}</span>
+                  </div>
+                )}
+
+                {project.gitStatus && (
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-muted-foreground">Git Status</span>
+                    <div className="flex gap-2 items-center">
+                      {project.gitStatus.isDirty && (
+                        <span className="text-xs text-yellow-500" title="Uncommitted changes">
+                          ●
+                        </span>
+                      )}
+                      {project.gitStatus.ahead > 0 && (
+                        <span className="text-xs text-blue-500" title={`${project.gitStatus.ahead} commits ahead`}>
+                          ↑{project.gitStatus.ahead}
+                        </span>
+                      )}
+                      {project.gitStatus.behind > 0 && (
+                        <span className="text-xs text-orange-500" title={`${project.gitStatus.behind} commits behind`}>
+                          ↓{project.gitStatus.behind}
+                        </span>
+                      )}
+                      {!project.gitStatus.isDirty && project.gitStatus.ahead === 0 && project.gitStatus.behind === 0 && (
+                        <span className="text-xs text-green-500" title="Clean and up to date">
+                          ✓
+                        </span>
+                      )}
+                    </div>
                   </div>
                 )}
 
@@ -296,6 +390,54 @@ function Dashboard() {
                     </button>
                   )}
                 </div>
+
+                {/* Git Actions */}
+                {project.gitStatus && (
+                  <div className="grid grid-cols-2 gap-2 mt-2">
+                    {project.gitStatus.isDirty && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          handleCommit(project.id)
+                        }}
+                        className="px-3 py-2 text-xs border border-border rounded hover:bg-accent transition"
+                      >
+                        💾 Commit
+                      </button>
+                    )}
+                    {project.gitStatus.ahead > 0 && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          handlePush(project)
+                        }}
+                        className="px-3 py-2 text-xs border border-border rounded hover:bg-accent transition"
+                      >
+                        ⬆️ Push
+                      </button>
+                    )}
+                    {project.gitStatus.behind > 0 && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          handlePull(project)
+                        }}
+                        className="px-3 py-2 text-xs border border-border rounded hover:bg-accent transition"
+                      >
+                        ⬇️ Pull
+                      </button>
+                    )}
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        handleManageBranches(project.id)
+                      }}
+                      className="px-3 py-2 text-xs border border-border rounded hover:bg-accent transition"
+                    >
+                      🌿 Branch
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           ))}
@@ -313,6 +455,28 @@ function Dashboard() {
         <TestResultsModal
           projectId={selectedProject}
           onClose={() => setSelectedProject(null)}
+        />
+      )}
+
+      {showCommitModal && commitProjectId && (
+        <CommitModal
+          project={projects.find(p => p.id === commitProjectId)!}
+          onClose={() => {
+            setShowCommitModal(false)
+            setCommitProjectId(null)
+          }}
+          onCommitted={loadProjects}
+        />
+      )}
+
+      {showBranchModal && branchProjectId && (
+        <BranchModal
+          project={projects.find(p => p.id === branchProjectId)!}
+          onClose={() => {
+            setShowBranchModal(false)
+            setBranchProjectId(null)
+          }}
+          onBranchChanged={loadProjects}
         />
       )}
     </div>
@@ -505,6 +669,284 @@ function TestResultsModal({ projectId, onClose }: {
             Close
           </button>
         </div>
+      </div>
+    </div>
+  )
+}
+
+// Commit Modal
+function CommitModal({ project, onClose, onCommitted }: {
+  project: Project
+  onClose: () => void
+  onCommitted: () => void
+}) {
+  const [message, setMessage] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setError('')
+    setLoading(true)
+
+    try {
+      if (!window.electronAPI) {
+        throw new Error('Electron API not available')
+      }
+
+      const result = await window.electronAPI.git.commit(project.path, message)
+
+      if (result.success) {
+        toast.success(`${project.name}: Changes committed`)
+        onCommitted()
+        onClose()
+      } else {
+        setError(result.error || 'Failed to commit changes')
+      }
+    } catch (err: any) {
+      setError(err.message)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+      <div className="bg-card border border-border rounded-lg p-6 w-full max-w-md">
+        <h2 className="text-xl font-semibold mb-4">Commit Changes</h2>
+        <p className="text-sm text-muted-foreground mb-4">
+          {project.name} - {project.gitStatus?.branch}
+        </p>
+
+        {project.gitStatus && (
+          <div className="mb-4 text-sm space-y-1">
+            {project.gitStatus.modified > 0 && (
+              <div>Modified: {project.gitStatus.modified}</div>
+            )}
+            {project.gitStatus.untracked > 0 && (
+              <div>Untracked: {project.gitStatus.untracked}</div>
+            )}
+            {project.gitStatus.staged > 0 && (
+              <div>Staged: {project.gitStatus.staged}</div>
+            )}
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit}>
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium mb-2">
+                Commit Message
+              </label>
+              <textarea
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                className="w-full px-3 py-2 bg-background border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary min-h-[100px]"
+                placeholder="Enter commit message..."
+                required
+              />
+            </div>
+
+            {error && (
+              <div className="p-3 bg-destructive/10 border border-destructive rounded-md text-sm text-destructive">
+                {error}
+              </div>
+            )}
+          </div>
+
+          <div className="flex gap-3 mt-6">
+            <button
+              type="button"
+              onClick={onClose}
+              className="flex-1 px-4 py-2 border border-border rounded-md hover:bg-accent transition"
+              disabled={loading}
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="flex-1 px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition disabled:opacity-50"
+              disabled={loading}
+            >
+              {loading ? 'Committing...' : 'Commit'}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  )
+}
+
+// Branch Management Modal
+function BranchModal({ project, onClose, onBranchChanged }: {
+  project: Project
+  onClose: () => void
+  onBranchChanged: () => void
+}) {
+  const [branches, setBranches] = useState<{ local: string[], remote: string[], current: string }>({ local: [], remote: [], current: '' })
+  const [newBranchName, setNewBranchName] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+  const [mode, setMode] = useState<'switch' | 'create'>('switch')
+
+  useEffect(() => {
+    loadBranches()
+  }, [])
+
+  const loadBranches = async () => {
+    try {
+      if (window.electronAPI) {
+        const branchData = await window.electronAPI.git.getBranches(project.path)
+        setBranches(branchData)
+      }
+    } catch (err) {
+      console.error('Failed to load branches:', err)
+    }
+  }
+
+  const handleSwitchBranch = async (branchName: string) => {
+    setError('')
+    setLoading(true)
+
+    try {
+      if (!window.electronAPI) return
+
+      const result = await window.electronAPI.git.switchBranch(project.path, branchName)
+
+      if (result.success) {
+        toast.success(`${project.name}: Switched to ${branchName}`)
+        onBranchChanged()
+        onClose()
+      } else {
+        setError(result.error || 'Failed to switch branch')
+      }
+    } catch (err: any) {
+      setError(err.message)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleCreateBranch = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setError('')
+    setLoading(true)
+
+    try {
+      if (!window.electronAPI) return
+
+      const result = await window.electronAPI.git.createBranch(project.path, newBranchName, true)
+
+      if (result.success) {
+        toast.success(`${project.name}: Created and switched to ${newBranchName}`)
+        onBranchChanged()
+        onClose()
+      } else {
+        setError(result.error || 'Failed to create branch')
+      }
+    } catch (err: any) {
+      setError(err.message)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+      <div className="bg-card border border-border rounded-lg p-6 w-full max-w-md max-h-[80vh] overflow-auto">
+        <h2 className="text-xl font-semibold mb-4">Branch Management</h2>
+        <p className="text-sm text-muted-foreground mb-4">
+          {project.name} - Current: {project.gitStatus?.branch || 'unknown'}
+        </p>
+
+        {/* Mode Tabs */}
+        <div className="flex gap-2 mb-4 border-b border-border">
+          <button
+            onClick={() => setMode('switch')}
+            className={`px-4 py-2 text-sm transition ${
+              mode === 'switch'
+                ? 'border-b-2 border-primary text-primary'
+                : 'text-muted-foreground hover:text-foreground'
+            }`}
+          >
+            Switch Branch
+          </button>
+          <button
+            onClick={() => setMode('create')}
+            className={`px-4 py-2 text-sm transition ${
+              mode === 'create'
+                ? 'border-b-2 border-primary text-primary'
+                : 'text-muted-foreground hover:text-foreground'
+            }`}
+          >
+            Create Branch
+          </button>
+        </div>
+
+        {mode === 'switch' ? (
+          <div className="space-y-2">
+            <h3 className="text-sm font-semibold mb-2">Local Branches</h3>
+            {branches.local.length > 0 ? (
+              branches.local.map(branch => (
+                <button
+                  key={branch}
+                  onClick={() => handleSwitchBranch(branch)}
+                  disabled={loading || branch === branches.current}
+                  className={`w-full text-left px-3 py-2 text-sm border border-border rounded hover:bg-accent transition disabled:opacity-50 ${
+                    branch === branches.current ? 'bg-accent' : ''
+                  }`}
+                >
+                  {branch} {branch === branches.current && '(current)'}
+                </button>
+              ))
+            ) : (
+              <p className="text-sm text-muted-foreground">No local branches</p>
+            )}
+          </div>
+        ) : (
+          <form onSubmit={handleCreateBranch}>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-2">
+                  New Branch Name
+                </label>
+                <input
+                  type="text"
+                  value={newBranchName}
+                  onChange={(e) => setNewBranchName(e.target.value)}
+                  className="w-full px-3 py-2 bg-background border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                  placeholder="feature/my-feature"
+                  required
+                />
+                <p className="text-xs text-muted-foreground mt-1">
+                  Branch will be created from current HEAD and checked out
+                </p>
+              </div>
+
+              <button
+                type="submit"
+                className="w-full px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition disabled:opacity-50"
+                disabled={loading}
+              >
+                {loading ? 'Creating...' : 'Create & Switch'}
+              </button>
+            </div>
+          </form>
+        )}
+
+        {error && (
+          <div className="mt-4 p-3 bg-destructive/10 border border-destructive rounded-md text-sm text-destructive">
+            {error}
+          </div>
+        )}
+
+        <button
+          onClick={onClose}
+          className="w-full mt-4 px-4 py-2 border border-border rounded-md hover:bg-accent transition"
+          disabled={loading}
+        >
+          Close
+        </button>
       </div>
     </div>
   )
