@@ -1,6 +1,7 @@
 import { app, BrowserWindow } from 'electron'
 import path from 'path'
 import { setupIpcHandlers } from './ipc-handlers'
+import { getConfigStore } from './services/ConfigStore'
 
 let mainWindow: BrowserWindow | null = null
 
@@ -47,7 +48,16 @@ function createWindow() {
 }
 
 // App lifecycle
-app.whenReady().then(() => {
+app.whenReady().then(async () => {
+  // Load config on startup
+  try {
+    const configStore = getConfigStore()
+    await configStore.load()
+    console.log('Config loaded successfully')
+  } catch (error) {
+    console.error('Failed to load config:', error)
+  }
+
   createWindow()
 
   app.on('activate', () => {

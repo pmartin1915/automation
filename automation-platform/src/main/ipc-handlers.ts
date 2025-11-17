@@ -1,35 +1,35 @@
 import { ipcMain } from 'electron'
 import { IPC_CHANNELS } from '../shared/types'
+import { getProjectManager } from './services/ProjectManager'
+import { getConfigStore } from './services/ConfigStore'
+
+let projectManager: ReturnType<typeof getProjectManager>
+let configStore: ReturnType<typeof getConfigStore>
 
 export function setupIpcHandlers() {
+  projectManager = getProjectManager()
+  configStore = getConfigStore()
+
   // Project handlers
   ipcMain.handle(IPC_CHANNELS.PROJECT_GET_ALL, async () => {
-    // TODO: Implement
-    return []
+    return projectManager.getAllProjects()
   })
 
-  ipcMain.handle(IPC_CHANNELS.PROJECT_ADD, async (_event, project) => {
-    // TODO: Implement
-    console.log('Add project:', project)
-    return { success: true, project }
+  ipcMain.handle(IPC_CHANNELS.PROJECT_ADD, async (_event, projectData) => {
+    return await projectManager.addProject(projectData)
   })
 
   ipcMain.handle(IPC_CHANNELS.PROJECT_REMOVE, async (_event, projectId) => {
-    // TODO: Implement
-    console.log('Remove project:', projectId)
-    return { success: true }
+    return await projectManager.removeProject(projectId)
   })
 
   ipcMain.handle(IPC_CHANNELS.PROJECT_GET, async (_event, projectId) => {
-    // TODO: Implement
-    console.log('Get project:', projectId)
-    return null
+    const project = projectManager.getProject(projectId)
+    return project || null
   })
 
   ipcMain.handle(IPC_CHANNELS.PROJECT_UPDATE, async (_event, project) => {
-    // TODO: Implement
-    console.log('Update project:', project)
-    return { success: true, project }
+    return await projectManager.updateProject(project)
   })
 
   // Test handlers
@@ -90,19 +90,17 @@ export function setupIpcHandlers() {
 
   // Config handlers
   ipcMain.handle(IPC_CHANNELS.CONFIG_GET, async () => {
-    // TODO: Implement
-    return {
-      projects: [],
-      theme: 'auto',
-      gitAutoPush: false,
-      branchNamingPattern: 'claude/{task}-v1'
-    }
+    return configStore.get()
   })
 
-  ipcMain.handle(IPC_CHANNELS.CONFIG_UPDATE, async (_event, config) => {
-    // TODO: Implement
-    console.log('Update config:', config)
-    return { success: true }
+  ipcMain.handle(IPC_CHANNELS.CONFIG_UPDATE, async (_event, updates) => {
+    try {
+      configStore.update(updates)
+      await configStore.save()
+      return { success: true }
+    } catch (error: any) {
+      return { success: false, error: error.message }
+    }
   })
 
   // Session handlers
