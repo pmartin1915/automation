@@ -8,7 +8,7 @@
     "strict": true,
     "resolveJsonModule": true,
     "moduleResolution": "node",
-    "outDir": "./dist/preload",
+    "outDir": "./dist",
     "rootDir": "./src",
     "composite": true
   },
