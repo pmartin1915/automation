@@ -4,22 +4,35 @@
 
 ## Project Status
 
-**Week 1 of Implementation: COMPLETE ✅**
+**Week 2 of Implementation: COMPLETE ✅**
 
 ### What's Built
 
+**Week 1 - Foundation:**
 - ✅ Electron + React + TypeScript project structure
 - ✅ Vite build tooling configured
 - ✅ IPC communication boilerplate (main ↔ renderer)
 - ✅ Tailwind CSS + shadcn/ui styling
 - ✅ Basic app layout (header, sidebar, dashboard)
 - ✅ TypeScript compilation for main and preload processes
-- ✅ Mock data for initial UI testing
+
+**Week 2 - Core Data Layer:**
+- ✅ Zustand store for state management
+- ✅ ConfigStore service (persists to ~/.claude-automation/config.json)
+- ✅ ProjectManager service with full CRUD operations
+- ✅ Project validation (detects language, test framework)
+- ✅ Functional IPC handlers connected to services
+- ✅ React UI connected to Electron API
+- ✅ Add Project modal with validation
+- ✅ Projects persist across app restarts
 
 ### Current Capabilities
 
-- Basic UI shell with navigation
-- Project dashboard with mock data
+- Add projects via UI (validates path, detects language/framework)
+- View all projects in dashboard
+- Projects saved to disk and loaded on startup
+- Auto-detection of JavaScript/TypeScript, Python, Go, Rust
+- Auto-detection of Jest, Vitest, Pytest, Cargo test, Go test
 - Clean, modern interface with dark mode support
 - Fully typed TypeScript codebase
 
@@ -29,7 +42,7 @@
 - **Frontend:** React 19 + TypeScript 5
 - **Build Tool:** Vite 7
 - **Styling:** Tailwind CSS 4 + shadcn/ui
-- **State Management:** Zustand (coming in Week 2)
+- **State Management:** Zustand ✅
 - **Git Operations:** simple-git (coming in Week 5)
 
 ## Development
@@ -101,29 +114,27 @@ automation-platform/
 └── package.json                # Dependencies and scripts
 ```
 
-## Next Steps (Week 2)
+## Next Steps (Week 3)
 
 According to the [Implementation Roadmap](/home/user/automation/docs/IMPLEMENTATION_ROADMAP.md):
 
-### Week 2: Core Data Layer
+### Week 3: Test Execution
 
 **Goals:**
-- Implement ProjectManager service (CRUD operations)
-- Create data models with Zustand
-- Set up configuration persistence (save/load projects.json)
-- Write unit tests for services
+- Implement TestRunner service
+- Execute tests via child processes
+- Stream output to UI in real-time
+- Handle multiple test frameworks (Jest, Vitest, Pytest, etc.)
 
 **Tasks:**
-- [ ] Define TypeScript interfaces (Project, TestResults, GitStatus)
-- [ ] Create Zustand store for state management
-- [ ] Implement ProjectManager.addProject()
-- [ ] Implement ProjectManager.removeProject()
-- [ ] Implement ProjectManager.getProject() / getAllProjects()
-- [ ] Add project validation (path exists, has package.json, etc.)
-- [ ] Implement ConfigStore (save/load from ~/.claude-automation/projects.json)
-- [ ] Auto-load projects on app start
-- [ ] Handle errors gracefully
-- [ ] Write unit tests for ProjectManager and ConfigStore
+- [ ] Create TestRunner service class
+- [ ] Implement runTest() with child_process.spawn()
+- [ ] Parse test output (Jest, Vitest, Pytest formats)
+- [ ] Stream test output to renderer via IPC
+- [ ] Display test results in UI with pass/fail counts
+- [ ] Add test file list view
+- [ ] Handle test errors and timeouts
+- [ ] Add "Run All Tests" functionality
 
 ## Documentation
 
