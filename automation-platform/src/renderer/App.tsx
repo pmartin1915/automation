@@ -87,10 +87,15 @@ function App() {
         }}
       />
       {/* Header */}
-      <header className="h-14 border-b border-border flex items-center px-6 bg-card">
+      <header className="h-16 border-b border-border flex items-center px-6 bg-card shadow-sm">
         <div className="flex items-center gap-3">
-          <div className="text-2xl">🤖</div>
-          <h1 className="text-lg font-semibold">Claude Automation Platform</h1>
+          <div className="text-3xl">🚂</div>
+          <div>
+            <h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+              Automation Station
+            </h1>
+            <p className="text-xs text-muted-foreground -mt-0.5">Your AI Development Hub</p>
+          </div>
         </div>
         <div className="ml-auto flex items-center gap-4">
           <button
@@ -108,44 +113,47 @@ function App() {
       {/* Main content area */}
       <div className="flex-1 flex overflow-hidden">
         {/* Sidebar */}
-        <aside className="w-64 border-r border-border bg-card p-4">
-          <nav className="space-y-2">
+        <aside className="w-64 border-r border-border bg-card p-6">
+          <nav className="space-y-1.5">
             <button
               onClick={() => setCurrentPage('dashboard')}
-              className={`w-full px-4 py-2 text-left rounded-md transition ${
+              className={`w-full px-4 py-3 text-left rounded-lg transition-all duration-200 flex items-center gap-3 font-medium ${
                 currentPage === 'dashboard'
-                  ? 'bg-primary text-primary-foreground'
-                  : 'hover:bg-accent'
+                  ? 'bg-primary text-primary-foreground shadow-md scale-[1.02]'
+                  : 'hover:bg-accent hover:translate-x-1'
               }`}
             >
-              📊 Dashboard
+              <span className="text-lg">📊</span>
+              <span>Dashboard</span>
             </button>
             <button
               onClick={() => setCurrentPage('sessions')}
-              className={`w-full px-4 py-2 text-left rounded-md transition ${
+              className={`w-full px-4 py-3 text-left rounded-lg transition-all duration-200 flex items-center gap-3 font-medium ${
                 currentPage === 'sessions'
-                  ? 'bg-primary text-primary-foreground'
-                  : 'hover:bg-accent'
+                  ? 'bg-primary text-primary-foreground shadow-md scale-[1.02]'
+                  : 'hover:bg-accent hover:translate-x-1'
               }`}
             >
-              📝 Sessions
+              <span className="text-lg">📝</span>
+              <span>Sessions</span>
             </button>
             <button
               onClick={() => setCurrentPage('settings')}
-              className={`w-full px-4 py-2 text-left rounded-md transition ${
+              className={`w-full px-4 py-3 text-left rounded-lg transition-all duration-200 flex items-center gap-3 font-medium ${
                 currentPage === 'settings'
-                  ? 'bg-primary text-primary-foreground'
-                  : 'hover:bg-accent'
+                  ? 'bg-primary text-primary-foreground shadow-md scale-[1.02]'
+                  : 'hover:bg-accent hover:translate-x-1'
               }`}
             >
-              ⚙️ Settings
+              <span className="text-lg">⚙️</span>
+              <span>Settings</span>
             </button>
           </nav>
 
           {/* Add Project Button */}
-          <div className="mt-6">
-            <button className="w-full px-4 py-3 border-2 border-dashed border-border rounded-md hover:border-primary hover:bg-accent transition text-sm font-medium">
-              + Add Project
+          <div className="mt-8">
+            <button className="w-full px-4 py-3 border-2 border-dashed border-border rounded-lg hover:border-primary hover:bg-accent transition-all duration-200 text-sm font-medium hover:shadow-md hover:scale-105 group">
+              <span className="text-primary group-hover:scale-110 inline-block transition-transform">+</span> Add Project
             </button>
           </div>
         </aside>

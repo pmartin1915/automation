@@ -42,13 +42,13 @@ export function SessionCard({ session, onPause, onResume, onComplete, onViewDeta
 
   const getStatusColor = () => {
     switch (session.status) {
-      case 'planning': return 'bg-blue-500'
-      case 'in_progress': return 'bg-green-500 animate-pulse'
-      case 'paused': return 'bg-yellow-500'
-      case 'completed': return 'bg-gray-500'
-      case 'blocked': return 'bg-red-500'
-      case 'abandoned': return 'bg-gray-400'
-      default: return 'bg-gray-500'
+      case 'planning': return 'bg-blue-500/10 text-blue-600 border border-blue-500/20'
+      case 'in_progress': return 'bg-green-500/10 text-green-600 border border-green-500/20 animate-pulse'
+      case 'paused': return 'bg-yellow-500/10 text-yellow-600 border border-yellow-500/20'
+      case 'completed': return 'bg-muted text-muted-foreground border border-border'
+      case 'blocked': return 'bg-red-500/10 text-red-600 border border-red-500/20'
+      case 'abandoned': return 'bg-muted text-muted-foreground border border-border'
+      default: return 'bg-muted text-muted-foreground border border-border'
     }
   }
 
@@ -57,27 +57,27 @@ export function SessionCard({ session, onPause, onResume, onComplete, onViewDeta
   }
 
   return (
-    <div className="border border-gray-200 rounded-lg p-4 bg-white shadow-sm hover:shadow-md transition-shadow">
-      <div className="flex items-start justify-between mb-2">
+    <div className="border border-border rounded-lg p-5 bg-card shadow-sm hover:shadow-lg transition-all duration-200 hover:scale-[1.01]">
+      <div className="flex items-start justify-between mb-3">
         <div className="flex-1">
-          <h4 className="font-semibold text-gray-900">{session.name}</h4>
-          <p className="text-sm text-gray-600 mt-1">{session.description}</p>
+          <h4 className="font-semibold text-foreground text-lg">{session.name}</h4>
+          <p className="text-sm text-muted-foreground mt-1.5 leading-relaxed">{session.description}</p>
         </div>
-        <span className={`px-2 py-1 rounded-full text-xs font-medium text-white ${getStatusColor()}`}>
+        <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor()}`}>
           {getStatusText()}
         </span>
       </div>
 
       {session.goal && (
-        <p className="text-sm text-gray-500 mb-2">
-          <span className="font-medium">Goal:</span> {session.goal}
+        <p className="text-sm text-muted-foreground mb-3 mt-2 p-2 bg-accent/50 rounded-md border-l-2 border-primary">
+          <span className="font-semibold text-foreground">Goal:</span> {session.goal}
         </p>
       )}
 
-      <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-100">
-        <div className="text-sm text-gray-600">
-          <span className="font-medium">Duration:</span>{' '}
-          <span className={session.status === 'in_progress' ? 'text-green-600 font-semibold' : ''}>
+      <div className="flex items-center justify-between mt-4 pt-4 border-t border-border">
+        <div className="text-sm text-muted-foreground">
+          <span className="font-semibold">Duration:</span>{' '}
+          <span className={session.status === 'in_progress' ? 'text-green-600 font-bold' : 'font-medium'}>
             {formatDuration(currentDuration)}
           </span>
         </div>
@@ -87,13 +87,13 @@ export function SessionCard({ session, onPause, onResume, onComplete, onViewDeta
             <>
               <button
                 onClick={onPause}
-                className="px-3 py-1 text-sm bg-yellow-500 text-white rounded hover:bg-yellow-600 transition-colors"
+                className="px-3 py-1.5 text-sm bg-yellow-500/10 text-yellow-600 border border-yellow-500/20 rounded-lg hover:bg-yellow-500/20 transition-all duration-200 font-medium"
               >
                 Pause
               </button>
               <button
                 onClick={onComplete}
-                className="px-3 py-1 text-sm bg-green-500 text-white rounded hover:bg-green-600 transition-colors"
+                className="px-3 py-1.5 text-sm bg-green-500/10 text-green-600 border border-green-500/20 rounded-lg hover:bg-green-500/20 transition-all duration-200 font-medium"
               >
                 Complete
               </button>
@@ -104,13 +104,13 @@ export function SessionCard({ session, onPause, onResume, onComplete, onViewDeta
             <>
               <button
                 onClick={onResume}
-                className="px-3 py-1 text-sm bg-green-500 text-white rounded hover:bg-green-600 transition-colors"
+                className="px-3 py-1.5 text-sm bg-green-500/10 text-green-600 border border-green-500/20 rounded-lg hover:bg-green-500/20 transition-all duration-200 font-medium"
               >
                 Resume
               </button>
               <button
                 onClick={onComplete}
-                className="px-3 py-1 text-sm bg-gray-500 text-white rounded hover:bg-gray-600 transition-colors"
+                className="px-3 py-1.5 text-sm bg-secondary text-secondary-foreground rounded-lg hover:bg-secondary/80 transition-all duration-200 font-medium"
               >
                 Complete
               </button>
@@ -119,7 +119,7 @@ export function SessionCard({ session, onPause, onResume, onComplete, onViewDeta
 
           <button
             onClick={onViewDetails}
-            className="px-3 py-1 text-sm bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+            className="px-3 py-1.5 text-sm bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-all duration-200 font-medium shadow-sm hover:shadow"
           >
             Details
           </button>

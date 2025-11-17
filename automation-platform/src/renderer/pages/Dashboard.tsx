@@ -294,7 +294,7 @@ function Dashboard() {
       <div className="p-8">
       {/* Week 8: Activity Feed and Metrics */}
       {projects.length > 0 && (
-        <div className="mb-8 grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="mb-10 grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Metrics Widget */}
           <MetricsWidget />
 
@@ -304,8 +304,8 @@ function Dashboard() {
       )}
 
       <div className="mb-8">
-        <h2 className="text-2xl font-bold mb-2">Projects</h2>
-        <p className="text-muted-foreground">
+        <h2 className="text-3xl font-bold mb-2 text-foreground">Projects</h2>
+        <p className="text-muted-foreground text-base">
           Manage and monitor your development projects
         </p>
       </div>
@@ -313,32 +313,32 @@ function Dashboard() {
       {loadingProjects ? (
         <SkeletonList count={3} />
       ) : projects.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-16 text-center">
-          <div className="text-6xl mb-4">📦</div>
-          <h3 className="text-xl font-semibold mb-2">No Projects Yet</h3>
-          <p className="text-muted-foreground mb-6">
+        <div className="flex flex-col items-center justify-center py-24 text-center">
+          <div className="text-8xl mb-6 animate-bounce">📦</div>
+          <h3 className="text-2xl font-bold mb-3 text-foreground">No Projects Yet</h3>
+          <p className="text-muted-foreground mb-8 text-lg max-w-md">
             Add your first project to get started, or drag & drop a folder here
           </p>
           <button
             onClick={handleAddProject}
-            className="px-6 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition"
+            className="px-8 py-3 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-all duration-200 font-semibold shadow-lg hover:shadow-xl hover:scale-105"
           >
-            + Add Project
+            + Add Your First Project
           </button>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
           {projects.map(project => (
             <div
               key={project.id}
-              className="border border-border rounded-lg p-6 bg-card hover:shadow-lg transition cursor-pointer"
+              className="border border-border rounded-xl p-6 bg-card hover:shadow-xl transition-all duration-300 cursor-pointer hover:scale-[1.02] hover:border-primary/30"
             >
-              <div className="flex items-start justify-between mb-4">
-                <div>
-                  <h3 className="font-semibold text-lg mb-1">{project.name}</h3>
-                  <p className="text-sm text-muted-foreground truncate">{project.path}</p>
+              <div className="flex items-start justify-between mb-5">
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-bold text-xl mb-2 text-foreground truncate">{project.name}</h3>
+                  <p className="text-xs text-muted-foreground truncate" title={project.path}>{project.path}</p>
                 </div>
-                <div className="text-2xl">
+                <div className="text-3xl ml-3 flex-shrink-0">
                   {(() => {
                     const result = testResults.get(project.id)
                     const isRunning = runningTests.has(project.id)
@@ -351,46 +351,46 @@ function Dashboard() {
                 </div>
               </div>
 
-              <div className="space-y-3">
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">Language</span>
-                  <span className="font-semibold">{project.language}</span>
+              <div className="space-y-3 mb-5">
+                <div className="flex items-center justify-between text-sm py-2 px-3 bg-accent/30 rounded-lg">
+                  <span className="text-muted-foreground font-medium">Language</span>
+                  <span className="font-bold text-foreground">{project.language}</span>
                 </div>
 
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">Test Framework</span>
-                  <span className="font-mono text-xs">{project.testFramework}</span>
+                <div className="flex items-center justify-between text-sm py-2 px-3 bg-accent/30 rounded-lg">
+                  <span className="text-muted-foreground font-medium">Test Framework</span>
+                  <span className="font-mono text-xs font-semibold text-foreground">{project.testFramework}</span>
                 </div>
 
                 {project.gitStatus && (
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-muted-foreground">Branch</span>
-                    <span className="font-mono text-xs">{project.gitStatus.branch}</span>
+                  <div className="flex items-center justify-between text-sm py-2 px-3 bg-accent/30 rounded-lg">
+                    <span className="text-muted-foreground font-medium">Branch</span>
+                    <span className="font-mono text-xs font-semibold text-foreground">{project.gitStatus.branch}</span>
                   </div>
                 )}
 
                 {project.gitStatus && (
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-muted-foreground">Git Status</span>
+                  <div className="flex items-center justify-between text-sm py-2 px-3 bg-accent/30 rounded-lg">
+                    <span className="text-muted-foreground font-medium">Git Status</span>
                     <div className="flex gap-2 items-center">
                       {project.gitStatus.isDirty && (
-                        <span className="text-xs text-yellow-500" title="Uncommitted changes">
-                          ●
+                        <span className="text-xs text-yellow-600 font-semibold" title="Uncommitted changes">
+                          ● Dirty
                         </span>
                       )}
                       {project.gitStatus.ahead > 0 && (
-                        <span className="text-xs text-blue-500" title={`${project.gitStatus.ahead} commits ahead`}>
+                        <span className="text-xs text-blue-600 font-semibold" title={`${project.gitStatus.ahead} commits ahead`}>
                           ↑{project.gitStatus.ahead}
                         </span>
                       )}
                       {project.gitStatus.behind > 0 && (
-                        <span className="text-xs text-orange-500" title={`${project.gitStatus.behind} commits behind`}>
+                        <span className="text-xs text-orange-600 font-semibold" title={`${project.gitStatus.behind} commits behind`}>
                           ↓{project.gitStatus.behind}
                         </span>
                       )}
                       {!project.gitStatus.isDirty && project.gitStatus.ahead === 0 && project.gitStatus.behind === 0 && (
-                        <span className="text-xs text-green-500" title="Clean and up to date">
-                          ✓
+                        <span className="text-xs text-green-600 font-semibold" title="Clean and up to date">
+                          ✓ Clean
                         </span>
                       )}
                     </div>
@@ -398,20 +398,20 @@ function Dashboard() {
                 )}
 
                 {testResults.get(project.id) && (
-                  <div className="flex items-center justify-between text-sm py-2 px-3 bg-accent/50 rounded">
-                    <span className="text-muted-foreground">Tests</span>
+                  <div className="flex items-center justify-between text-sm py-2 px-3 bg-green-500/10 border border-green-500/20 rounded-lg">
+                    <span className="text-green-700 font-semibold">Tests</span>
                     <span className="font-mono text-xs">
-                      <span className="text-green-500">✓ {testResults.get(project.id)!.passed}</span>
+                      <span className="text-green-600 font-bold">✓ {testResults.get(project.id)!.passed}</span>
                       {testResults.get(project.id)!.failed > 0 && (
-                        <span className="text-red-500 ml-2">✗ {testResults.get(project.id)!.failed}</span>
+                        <span className="text-red-600 font-bold ml-2">✗ {testResults.get(project.id)!.failed}</span>
                       )}
                     </span>
                   </div>
                 )}
 
                 {/* Watch Mode Toggle */}
-                <div className="flex items-center justify-between text-sm py-2 px-3 bg-accent/30 rounded border border-border">
-                  <span className="text-muted-foreground flex items-center gap-2">
+                <div className="flex items-center justify-between text-sm py-2.5 px-3 bg-accent/30 rounded-lg border border-border">
+                  <span className="text-muted-foreground flex items-center gap-2 font-medium">
                     {project.watchMode ? '👁️' : '⏸️'}
                     Watch Mode
                   </span>
@@ -420,30 +420,34 @@ function Dashboard() {
                       e.stopPropagation()
                       handleToggleWatch(project)
                     }}
-                    className={`px-2 py-1 text-xs rounded transition ${
+                    className={`px-3 py-1 text-xs font-bold rounded-lg transition-all duration-200 ${
                       project.watchMode
-                        ? 'bg-green-500/20 text-green-500 hover:bg-green-500/30'
-                        : 'bg-muted hover:bg-accent'
+                        ? 'bg-green-500/20 text-green-600 border border-green-500/30 hover:bg-green-500/30'
+                        : 'bg-muted text-muted-foreground border border-border hover:bg-accent'
                     }`}
                   >
                     {project.watchMode ? 'ON' : 'OFF'}
                   </button>
                 </div>
+              </div>
 
-                <div className="flex gap-2 mt-4">
+              {/* Action Buttons Section */}
+              <div className="space-y-3 pt-4 border-t border-border">
+                {/* Primary Actions */}
+                <div className="flex gap-2">
                   <button
                     onClick={() => handleRunTests(project.id)}
                     disabled={runningTests.has(project.id)}
-                    className="flex-1 px-3 py-2 text-sm border border-border rounded hover:bg-accent transition disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="flex-1 px-4 py-2.5 text-sm border-2 border-border rounded-lg hover:bg-accent transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed font-medium hover:border-primary/50 hover:shadow-md"
                   >
                     {runningTests.has(project.id) ? '⏳ Running...' : '🧪 Run Tests'}
                   </button>
                   {testResults.get(project.id) && (
                     <button
                       onClick={() => handleViewResults(project.id)}
-                      className="flex-1 px-3 py-2 text-sm bg-primary text-primary-foreground rounded hover:bg-primary/90 transition"
+                      className="flex-1 px-4 py-2.5 text-sm bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-all duration-200 font-medium shadow-md hover:shadow-lg"
                     >
-                      📊 View Results
+                      📊 Results
                     </button>
                   )}
                 </div>
@@ -454,21 +458,21 @@ function Dashboard() {
                     e.stopPropagation()
                     handleLaunchClaude(project.id)
                   }}
-                  className="w-full px-3 py-2 mt-2 text-sm bg-gradient-to-r from-purple-500 to-blue-500 text-white rounded hover:opacity-90 transition font-medium"
+                  className="w-full px-4 py-3 text-sm bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg hover:from-purple-700 hover:to-blue-700 transition-all duration-200 font-bold shadow-lg hover:shadow-xl hover:scale-105"
                 >
-                  🤖 Launch Claude Code
+                  🚀 Launch Claude Code
                 </button>
 
                 {/* Git Actions */}
                 {project.gitStatus && (
-                  <div className="grid grid-cols-2 gap-2 mt-2">
+                  <div className="grid grid-cols-2 gap-2">
                     {project.gitStatus.isDirty && (
                       <button
                         onClick={(e) => {
                           e.stopPropagation()
                           handleCommit(project.id)
                         }}
-                        className="px-3 py-2 text-xs border border-border rounded hover:bg-accent transition"
+                        className="px-3 py-2 text-xs border border-border rounded-lg hover:bg-accent transition-all duration-200 font-medium hover:border-primary/30"
                       >
                         💾 Commit
                       </button>
@@ -479,7 +483,7 @@ function Dashboard() {
                           e.stopPropagation()
                           handlePush(project)
                         }}
-                        className="px-3 py-2 text-xs border border-border rounded hover:bg-accent transition"
+                        className="px-3 py-2 text-xs border border-border rounded-lg hover:bg-accent transition-all duration-200 font-medium hover:border-primary/30"
                       >
                         ⬆️ Push
                       </button>
@@ -490,7 +494,7 @@ function Dashboard() {
                           e.stopPropagation()
                           handlePull(project)
                         }}
-                        className="px-3 py-2 text-xs border border-border rounded hover:bg-accent transition"
+                        className="px-3 py-2 text-xs border border-border rounded-lg hover:bg-accent transition-all duration-200 font-medium hover:border-primary/30"
                       >
                         ⬇️ Pull
                       </button>
@@ -500,7 +504,7 @@ function Dashboard() {
                         e.stopPropagation()
                         handleManageBranches(project.id)
                       }}
-                      className="px-3 py-2 text-xs border border-border rounded hover:bg-accent transition"
+                      className="px-3 py-2 text-xs border border-border rounded-lg hover:bg-accent transition-all duration-200 font-medium hover:border-primary/30"
                     >
                       🌿 Branch
                     </button>

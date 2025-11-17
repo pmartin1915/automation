@@ -138,18 +138,18 @@ ${selectedSession.commitShas.length > 0 ? selectedSession.commitShas.map(sha => 
   }
 
   return (
-    <div className="p-6 max-w-7xl mx-auto">
+    <div className="p-8 max-w-7xl mx-auto">
       {/* Header */}
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex justify-between items-center mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Sessions</h1>
-          <p className="text-gray-600 mt-1">Track your development work sessions</p>
+          <h1 className="text-3xl font-bold text-foreground">Sessions</h1>
+          <p className="text-muted-foreground mt-2">Track your development work sessions</p>
         </div>
         <div className="flex gap-3">
           {selectedSession && (
             <button
               onClick={handleExportReport}
-              className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors flex items-center gap-2"
+              className="px-4 py-2.5 bg-secondary text-secondary-foreground rounded-lg hover:bg-secondary/80 transition-all duration-200 flex items-center gap-2 font-medium shadow-sm hover:shadow"
             >
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -159,7 +159,7 @@ ${selectedSession.commitShas.length > 0 ? selectedSession.commitShas.map(sha => 
           )}
           <button
             onClick={() => setShowCreateModal(true)}
-            className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors flex items-center gap-2"
+            className="px-5 py-2.5 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-all duration-200 flex items-center gap-2 font-medium shadow-md hover:shadow-lg hover:scale-105"
           >
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
