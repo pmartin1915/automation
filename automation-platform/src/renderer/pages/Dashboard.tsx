@@ -225,6 +225,73 @@ function Dashboard() {
     setShowContextModal(true)
   }
 
+  const handleCopyForClaude = async (projectId: string) => {
+    const project = projects.find(p => p.id === projectId)
+    if (!project) return
+
+    const testResult = testResults.get(projectId)
+    const testOutput = useStore.getState().testOutput.get(projectId) || []
+
+    // Format test output for Claude
+    let formatted = `# Test Results for ${project.name}\n\n`
+
+    formatted += `## Project Info\n`
+    formatted += `- **Path:** \`${project.path}\`\n`
+    formatted += `- **Language:** ${project.language}\n`
+    formatted += `- **Test Framework:** ${project.testFramework}\n\n`
+
+    if (project.gitStatus) {
+      formatted += `## Git Status\n`
+      formatted += `- **Branch:** \`${project.gitStatus.branch}\`\n`
+      formatted += `- **Status:** ${project.gitStatus.isDirty ? '⚠️ Uncommitted changes' : '✅ Clean'}\n`
+      if (project.gitStatus.ahead > 0) {
+        formatted += `- **Ahead:** ${project.gitStatus.ahead} commit(s)\n`
+      }
+      if (project.gitStatus.behind > 0) {
+        formatted += `- **Behind:** ${project.gitStatus.behind} commit(s)\n`
+      }
+      formatted += `\n`
+    }
+
+    if (testResult) {
+      formatted += `## Test Summary\n`
+      formatted += `- **Passed:** ${testResult.passed}\n`
+      formatted += `- **Failed:** ${testResult.failed}\n`
+      formatted += `- **Total:** ${testResult.passed + testResult.failed}\n`
+      formatted += `- **Success Rate:** ${Math.round((testResult.passed / (testResult.passed + testResult.failed)) * 100)}%\n\n`
+
+      if (testResult.failed > 0) {
+        formatted += `## ❌ Action Required\n`
+        formatted += `**${testResult.failed} test(s) are failing. Please fix them.**\n\n`
+      } else {
+        formatted += `## ✅ All Tests Passing\n`
+        formatted += `Great job! All ${testResult.passed} tests are passing.\n\n`
+      }
+    }
+
+    if (testOutput.length > 0) {
+      formatted += `## Test Output\n\n`
+      formatted += '```\n'
+      formatted += testOutput.join('')
+      formatted += '\n```\n\n'
+    }
+
+    formatted += `## Task\n`
+    if (testResult && testResult.failed > 0) {
+      formatted += `Fix the ${testResult.failed} failing test(s) above. Review the test output and make the necessary code changes to make all tests pass.\n`
+    } else {
+      formatted += `Review the test results above.\n`
+    }
+
+    try {
+      await navigator.clipboard.writeText(formatted)
+      toast.success(`📋 Test context copied! Paste into Claude Code`, { duration: 3000 })
+    } catch (error) {
+      console.error('Failed to copy:', error)
+      toast.error('Failed to copy to clipboard')
+    }
+  }
+
   const handlePush = async (project: Project) => {
     try {
       if (!window.electronAPI || !project.gitStatus) return
@@ -451,6 +518,19 @@ function Dashboard() {
                     </button>
                   )}
                 </div>
+
+                {/* Copy for Claude Button - Show if tests have been run */}
+                {testResults.get(project.id) && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      handleCopyForClaude(project.id)
+                    }}
+                    className="w-full px-4 py-2.5 text-sm bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-lg hover:from-green-700 hover:to-emerald-700 transition-all duration-200 font-bold shadow-md hover:shadow-lg hover:scale-[1.02] flex items-center justify-center gap-2"
+                  >
+                    📋 Copy for Claude Code
+                  </button>
+                )}
 
                 {/* Launch Claude Code Button */}
                 <button
