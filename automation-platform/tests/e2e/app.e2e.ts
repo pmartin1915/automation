@@ -1,0 +1,130 @@
+import { test, expect, _electron as electron } from '@playwright/test'
+import path from 'path'
+
+/**
+ * E2E tests for Automation Station Electron app
+ * These tests launch the actual Electron application and test it end-to-end
+ */
+
+test.describe('Automation Station App', () => {
+  test('should launch electron app and show main window', async () => {
+    // Launch Electron app
+    const electronApp = await electron.launch({
+      args: [path.join(__dirname, '../../dist/main/index.js')],
+    })
+
+    // Wait for the first window
+    const window = await electronApp.firstWindow()
+
+    // Verify window title
+    const title = await window.title()
+    expect(title).toContain('Automation Station')
+
+    // Take screenshot
+    await window.screenshot({ path: 'test-results/screenshots/main-window.png' })
+
+    // Close app
+    await electronApp.close()
+  })
+
+  test('should display branding correctly', async () => {
+    const electronApp = await electron.launch({
+      args: [path.join(__dirname, '../../dist/main/index.js')],
+    })
+
+    const window = await electronApp.firstWindow()
+
+    // Wait for app to load
+    await window.waitForSelector('text=Automation Station')
+
+    // Verify header text exists
+    const header = await window.textContent('h1')
+    expect(header).toBe('Automation Station')
+
+    // Verify tagline exists
+    const tagline = await window.textContent('text=Your AI Development Hub')
+    expect(tagline).toBeTruthy()
+
+    await electronApp.close()
+  })
+
+  test('should navigate between pages', async () => {
+    const electronApp = await electron.launch({
+      args: [path.join(__dirname, '../../dist/main/index.js')],
+    })
+
+    const window = await electronApp.firstWindow()
+
+    // Wait for sidebar to load
+    await window.waitForSelector('nav')
+
+    // Click on Sessions page
+    await window.click('text=Sessions')
+    await window.waitForSelector('text=Track your development work sessions')
+
+    // Verify we're on Sessions page
+    const heading = await window.textContent('h1')
+    expect(heading).toBe('Sessions')
+
+    // Click on Settings page
+    await window.click('text=Settings')
+    await window.waitForSelector('text=General Settings')
+
+    // Verify we're on Settings page
+    const settingsHeading = await window.textContent('h1')
+    expect(settingsHeading).toContain('Settings')
+
+    await electronApp.close()
+  })
+
+  test('should show empty state when no projects exist', async () => {
+    const electronApp = await electron.launch({
+      args: [path.join(__dirname, '../../dist/main/index.js')],
+    })
+
+    const window = await electronApp.firstWindow()
+
+    // Wait for Dashboard to load
+    await window.waitForSelector('text=Projects')
+
+    // Check for empty state
+    const emptyState = await window.textContent('text=No Projects Yet')
+    expect(emptyState).toBeTruthy()
+
+    // Verify Add Project button exists
+    const addButton = await window.textContent('button:has-text("Add Your First Project")')
+    expect(addButton).toBeTruthy()
+
+    await electronApp.close()
+  })
+
+  test('should show keyboard shortcuts modal', async () => {
+    const electronApp = await electron.launch({
+      args: [path.join(__dirname, '../../dist/main/index.js')],
+    })
+
+    const window = await electronApp.firstWindow()
+
+    // Wait for shortcuts button
+    await window.waitForSelector('text=Shortcuts')
+
+    // Click shortcuts button
+    await window.click('button:has-text("Shortcuts")')
+
+    // Wait for modal to appear
+    await window.waitForSelector('text=Keyboard Shortcuts')
+
+    // Verify modal content
+    const modalTitle = await window.textContent('text=Keyboard Shortcuts')
+    expect(modalTitle).toBeTruthy()
+
+    // Close modal with Escape
+    await window.keyboard.press('Escape')
+
+    // Verify modal is closed
+    const modalExists = await window.locator('text=Keyboard Shortcuts').count()
+    expect(modalExists).toBe(0)
+
+    await electronApp.close()
+  })
+})

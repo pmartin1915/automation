@@ -31,3 +31,11 @@ Thumbs.db
 
 # Config (will be user-specific)
 .claude-automation/
+
+# Test results and coverage
+test-results/
+coverage/
+.nyc_output/
+playwright-report/
+*.spec.ts-snapshots/
+*.visual.ts-snapshots/
