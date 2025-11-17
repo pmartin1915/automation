@@ -4,6 +4,8 @@ import { useStore } from '../store/useStore'
 import { ContextPreviewModal } from '../components/ContextPreviewModal'
 import { ActivityFeed } from '../components/ActivityFeed'
 import { MetricsWidget } from '../components/MetricsWidget'
+import { DropZone } from '../components/DropZone'
+import { SkeletonList } from '../components/SkeletonCard'
 import type { Project } from '../../shared/types'
 
 function Dashboard() {
@@ -25,6 +27,8 @@ function Dashboard() {
   const [commitProjectId, setCommitProjectId] = useState<string | null>(null)
   const [branchProjectId, setBranchProjectId] = useState<string | null>(null)
   const [contextProjectId, setContextProjectId] = useState<string | null>(null)
+  const [droppedFolderData, setDroppedFolderData] = useState<any>(null)
+  const [loadingProjects, setLoadingProjects] = useState(true)
 
   useEffect(() => {
     // Load projects from Electron API on mount
@@ -129,6 +133,7 @@ function Dashboard() {
   }
 
   const loadProjects = async () => {
+    setLoadingProjects(true)
     try {
       if (window.electronAPI) {
         const loadedProjects = await window.electronAPI.projects.getAll()
@@ -150,6 +155,8 @@ function Dashboard() {
       }
     } catch (error) {
       console.error('Failed to load projects:', error)
+    } finally {
+      setLoadingProjects(false)
     }
   }
 
@@ -256,8 +263,35 @@ function Dashboard() {
     }
   }
 
+  const handleFolderDrop = async (paths: string[]) => {
+    if (!window.electronAPI || paths.length === 0) return
+
+    // For now, only handle single folder drops
+    const folderPath = paths[0]
+
+    toast.loading('Analyzing folder...')
+
+    try {
+      const result = await window.electronAPI.projects.analyzeFolder(folderPath)
+
+      toast.dismiss()
+
+      if (result.valid) {
+        // Show confirmation modal with detected data
+        setDroppedFolderData(result)
+      } else {
+        toast.error(`Invalid project folder: ${result.error}`)
+      }
+    } catch (error) {
+      toast.dismiss()
+      console.error('Error analyzing folder:', error)
+      toast.error('Failed to analyze folder')
+    }
+  }
+
   return (
-    <div className="p-8">
+    <DropZone onDrop={handleFolderDrop}>
+      <div className="p-8">
       {/* Week 8: Activity Feed and Metrics */}
       {projects.length > 0 && (
         <div className="mb-8 grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -276,12 +310,14 @@ function Dashboard() {
         </p>
       </div>
 
-      {projects.length === 0 ? (
+      {loadingProjects ? (
+        <SkeletonList count={3} />
+      ) : projects.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-16 text-center">
           <div className="text-6xl mb-4">📦</div>
           <h3 className="text-xl font-semibold mb-2">No Projects Yet</h3>
           <p className="text-muted-foreground mb-6">
-            Add your first project to get started
+            Add your first project to get started, or drag & drop a folder here
           </p>
           <button
             onClick={handleAddProject}
@@ -523,7 +559,19 @@ function Dashboard() {
           }}
         />
       )}
+
+      {droppedFolderData && (
+        <AddProjectFromDropModal
+          folderData={droppedFolderData}
+          onClose={() => setDroppedFolderData(null)}
+          onProjectAdded={() => {
+            setDroppedFolderData(null)
+            loadProjects()
+          }}
+        />
+      )}
     </div>
+    </DropZone>
   )
 }
 
@@ -991,6 +1039,155 @@ function BranchModal({ project, onClose, onBranchChanged }: {
         >
           Close
         </button>
+      </div>
+    </div>
+  )
+}
+
+// Add Project from Drop Modal
+function AddProjectFromDropModal({ folderData, onClose, onProjectAdded }: {
+  folderData: any
+  onClose: () => void
+  onProjectAdded: () => void
+}) {
+  const [name, setName] = useState(folderData.name || '')
+  const [path] = useState(folderData.path || '')
+  const [language, setLanguage] = useState<Project['language']>(folderData.language || 'other')
+  const [testFramework, setTestFramework] = useState<Project['testFramework']>(folderData.testFramework || 'other')
+  const [error, setError] = useState('')
+  const [loading, setLoading] = useState(false)
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setError('')
+    setLoading(true)
+
+    try {
+      if (!window.electronAPI) {
+        throw new Error('Electron API not available')
+      }
+
+      const result = await window.electronAPI.projects.add({
+        name,
+        path,
+        language,
+        testFramework
+      })
+
+      if (result.success) {
+        toast.success(`${name}: Added successfully!`)
+        onProjectAdded()
+        onClose()
+      } else {
+        setError(result.error || 'Failed to add project')
+      }
+    } catch (err: any) {
+      setError(err.message)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+      <div className="bg-card border border-border rounded-lg p-6 w-full max-w-md">
+        <h2 className="text-xl font-semibold mb-4">📁 Add Project from Folder</h2>
+        <p className="text-sm text-muted-foreground mb-4">
+          We've detected the following project settings. You can adjust them before adding.
+        </p>
+
+        <form onSubmit={handleSubmit}>
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium mb-2">
+                Project Name
+              </label>
+              <input
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="w-full px-3 py-2 bg-background border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                placeholder="My Project"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-2">
+                Project Path
+              </label>
+              <input
+                type="text"
+                value={path}
+                disabled
+                className="w-full px-3 py-2 bg-muted border border-border rounded-md text-muted-foreground cursor-not-allowed"
+              />
+              <p className="text-xs text-muted-foreground mt-1">
+                Path cannot be changed
+              </p>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-2">
+                Language
+              </label>
+              <select
+                value={language}
+                onChange={(e) => setLanguage(e.target.value as Project['language'])}
+                className="w-full px-3 py-2 bg-background border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+              >
+                <option value="javascript">JavaScript</option>
+                <option value="typescript">TypeScript</option>
+                <option value="python">Python</option>
+                <option value="go">Go</option>
+                <option value="rust">Rust</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-2">
+                Test Framework
+              </label>
+              <select
+                value={testFramework}
+                onChange={(e) => setTestFramework(e.target.value as Project['testFramework'])}
+                className="w-full px-3 py-2 bg-background border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+              >
+                <option value="jest">Jest</option>
+                <option value="vitest">Vitest</option>
+                <option value="pytest">Pytest</option>
+                <option value="go-test">Go Test</option>
+                <option value="cargo-test">Cargo Test</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+
+            {error && (
+              <div className="p-3 bg-destructive/10 border border-destructive rounded-md text-sm text-destructive">
+                {error}
+              </div>
+            )}
+          </div>
+
+          <div className="flex gap-3 mt-6">
+            <button
+              type="button"
+              onClick={onClose}
+              className="flex-1 px-4 py-2 border border-border rounded-md hover:bg-accent transition"
+              disabled={loading}
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="flex-1 px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition disabled:opacity-50"
+              disabled={loading}
+            >
+              {loading ? 'Adding...' : 'Add Project'}
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   )

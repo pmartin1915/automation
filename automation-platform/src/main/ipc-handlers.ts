@@ -54,6 +54,10 @@ export function setupIpcHandlers() {
     return await projectManager.updateProject(project)
   })
 
+  ipcMain.handle(IPC_CHANNELS.PROJECT_ANALYZE_FOLDER, async (_event, folderPath) => {
+    return await projectManager.analyzeFolder(folderPath)
+  })
+
   // Test handlers
   ipcMain.handle(IPC_CHANNELS.TEST_RUN, async (_event, { projectId, testFile }) => {
     return await testRunner.runTests(projectId, testFile)

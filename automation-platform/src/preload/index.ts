@@ -11,7 +11,8 @@ const api = {
     get: (projectId: string) => ipcRenderer.invoke(IPC_CHANNELS.PROJECT_GET, projectId),
     add: (project: Partial<Project>) => ipcRenderer.invoke(IPC_CHANNELS.PROJECT_ADD, project),
     update: (project: Project) => ipcRenderer.invoke(IPC_CHANNELS.PROJECT_UPDATE, project),
-    remove: (projectId: string) => ipcRenderer.invoke(IPC_CHANNELS.PROJECT_REMOVE, projectId)
+    remove: (projectId: string) => ipcRenderer.invoke(IPC_CHANNELS.PROJECT_REMOVE, projectId),
+    analyzeFolder: (folderPath: string) => ipcRenderer.invoke(IPC_CHANNELS.PROJECT_ANALYZE_FOLDER, folderPath)
   },
 
   // Test operations

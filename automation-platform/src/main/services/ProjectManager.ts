@@ -8,6 +8,39 @@ export class ProjectManager {
   private configStore = getConfigStore()
 
   /**
+   * Analyze a folder to detect project details
+   * Used for drag & drop folder analysis
+   */
+  async analyzeFolder(folderPath: string): Promise<{
+    valid: boolean
+    name?: string
+    path?: string
+    language?: Project['language']
+    testFramework?: Project['testFramework']
+    error?: string
+  }> {
+    const validation = await this.validateProject(folderPath)
+
+    if (!validation.valid) {
+      return {
+        valid: false,
+        error: validation.error
+      }
+    }
+
+    // Extract folder name as suggested project name
+    const name = path.basename(folderPath)
+
+    return {
+      valid: true,
+      name,
+      path: folderPath,
+      language: validation.language,
+      testFramework: validation.testFramework
+    }
+  }
+
+  /**
    * Validate a project path
    */
   async validateProject(projectPath: string): Promise<{

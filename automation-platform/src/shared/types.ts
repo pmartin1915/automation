@@ -196,6 +196,7 @@ export const IPC_CHANNELS = {
   PROJECT_GET: 'project:get',
   PROJECT_GET_ALL: 'project:getAll',
   PROJECT_UPDATE: 'project:update',
+  PROJECT_ANALYZE_FOLDER: 'project:analyzeFolder',
 
   // Test operations
   TEST_RUN: 'test:run',

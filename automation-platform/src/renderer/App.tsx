@@ -1,10 +1,64 @@
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
 import { Toaster } from 'react-hot-toast'
 import Dashboard from './pages/Dashboard'
 import { Sessions } from './pages/Sessions'
+import { Settings } from './pages/Settings'
+import { useKeyboardShortcuts, type KeyboardShortcut } from './hooks/useKeyboardShortcuts'
+import { KeyboardShortcutsModal } from './components/KeyboardShortcutsModal'
 
 function App() {
   const [currentPage, setCurrentPage] = useState<'dashboard' | 'sessions' | 'settings'>('dashboard')
+  const [showShortcutsModal, setShowShortcutsModal] = useState(false)
+
+  // Define global keyboard shortcuts
+  const shortcuts: KeyboardShortcut[] = [
+    // Navigation
+    {
+      key: '1',
+      ctrlOrCmd: true,
+      action: () => setCurrentPage('dashboard'),
+      description: 'Go to Dashboard',
+      category: 'Navigation',
+    },
+    {
+      key: '2',
+      ctrlOrCmd: true,
+      action: () => setCurrentPage('sessions'),
+      description: 'Go to Sessions',
+      category: 'Navigation',
+    },
+    {
+      key: '3',
+      ctrlOrCmd: true,
+      action: () => setCurrentPage('settings'),
+      description: 'Go to Settings',
+      category: 'Navigation',
+    },
+    {
+      key: ',',
+      ctrlOrCmd: true,
+      action: () => setCurrentPage('settings'),
+      description: 'Open Settings',
+      category: 'Navigation',
+    },
+    // Help
+    {
+      key: '/',
+      ctrlOrCmd: true,
+      action: () => setShowShortcutsModal(true),
+      description: 'Show Keyboard Shortcuts',
+      category: 'Help',
+    },
+    {
+      key: 'Escape',
+      action: () => setShowShortcutsModal(false),
+      description: 'Close Modal',
+      category: 'General',
+    },
+  ]
+
+  // Register keyboard shortcuts
+  useKeyboardShortcuts({ shortcuts })
 
   return (
     <div className="h-screen w-screen flex flex-col overflow-hidden bg-background text-foreground">
@@ -39,6 +93,14 @@ function App() {
           <h1 className="text-lg font-semibold">Claude Automation Platform</h1>
         </div>
         <div className="ml-auto flex items-center gap-4">
+          <button
+            onClick={() => setShowShortcutsModal(true)}
+            className="text-xs text-muted-foreground hover:text-foreground transition flex items-center gap-1 px-2 py-1 rounded hover:bg-accent"
+            title="View keyboard shortcuts"
+          >
+            <span>⌨️</span>
+            <span>Shortcuts</span>
+          </button>
           <span className="text-sm text-muted-foreground">v1.0.0</span>
         </div>
       </header>
@@ -92,14 +154,17 @@ function App() {
         <main className="flex-1 overflow-auto">
           {currentPage === 'dashboard' && <Dashboard />}
           {currentPage === 'sessions' && <Sessions />}
-          {currentPage === 'settings' && (
-            <div className="p-6">
-              <h2 className="text-2xl font-bold">Settings</h2>
-              <p className="text-muted-foreground mt-2">Settings page coming soon...</p>
-            </div>
-          )}
+          {currentPage === 'settings' && <Settings />}
         </main>
       </div>
+
+      {/* Keyboard Shortcuts Modal */}
+      {showShortcutsModal && (
+        <KeyboardShortcutsModal
+          shortcuts={shortcuts}
+          onClose={() => setShowShortcutsModal(false)}
+        />
+      )}
     </div>
   )
 }
