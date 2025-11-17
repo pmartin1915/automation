@@ -1,4 +1,4 @@
-import { ipcMain, BrowserWindow } from 'electron'
+import { ipcMain, BrowserWindow, shell } from 'electron'
 import { IPC_CHANNELS } from '../shared/types'
 import { getProjectManager } from './services/ProjectManager'
 import { getConfigStore } from './services/ConfigStore'
@@ -6,6 +6,7 @@ import { getTestRunner } from './services/TestRunner'
 import { getFileWatcher } from './services/FileWatcher'
 import { gitService } from './services/GitService'
 import { SessionService } from './services/SessionService'
+import { contextBuilder } from './services/ContextBuilder'
 
 let projectManager: ReturnType<typeof getProjectManager>
 let configStore: ReturnType<typeof getConfigStore>
@@ -317,6 +318,42 @@ export function setupIpcHandlers() {
       return { success: linked }
     } catch (error: any) {
       console.error('Error linking commit:', error)
+      return { success: false, error: error.message }
+    }
+  })
+
+  // Context handlers (Week 7)
+  ipcMain.handle(IPC_CHANNELS.CONTEXT_GET_TEMPLATES, async () => {
+    try {
+      const templates = contextBuilder.getTemplates()
+      return { success: true, templates }
+    } catch (error: any) {
+      console.error('Error getting context templates:', error)
+      return { success: false, error: error.message }
+    }
+  })
+
+  ipcMain.handle(IPC_CHANNELS.CONTEXT_GENERATE, async (_event, { projectId, templateId, options }) => {
+    try {
+      const project = projectManager.getProject(projectId)
+      if (!project) {
+        return { success: false, error: 'Project not found' }
+      }
+
+      const context = await contextBuilder.generateContext(project, templateId, options)
+      return { success: true, context }
+    } catch (error: any) {
+      console.error('Error generating context:', error)
+      return { success: false, error: error.message }
+    }
+  })
+
+  ipcMain.handle(IPC_CHANNELS.CONTEXT_OPEN_EXTERNAL, async (_event, url) => {
+    try {
+      await shell.openExternal(url)
+      return { success: true }
+    } catch (error: any) {
+      console.error('Error opening external URL:', error)
       return { success: false, error: error.message }
     }
   })

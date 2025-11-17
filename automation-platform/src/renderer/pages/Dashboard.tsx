@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
 import { useStore } from '../store/useStore'
+import { ContextPreviewModal } from '../components/ContextPreviewModal'
 import type { Project } from '../../shared/types'
 
 function Dashboard() {
@@ -18,8 +19,10 @@ function Dashboard() {
   const [selectedProject, setSelectedProject] = useState<string | null>(null)
   const [showCommitModal, setShowCommitModal] = useState(false)
   const [showBranchModal, setShowBranchModal] = useState(false)
+  const [showContextModal, setShowContextModal] = useState(false)
   const [commitProjectId, setCommitProjectId] = useState<string | null>(null)
   const [branchProjectId, setBranchProjectId] = useState<string | null>(null)
+  const [contextProjectId, setContextProjectId] = useState<string | null>(null)
 
   useEffect(() => {
     // Load projects from Electron API on mount
@@ -208,6 +211,11 @@ function Dashboard() {
     setShowBranchModal(true)
   }
 
+  const handleLaunchClaude = (projectId: string) => {
+    setContextProjectId(projectId)
+    setShowContextModal(true)
+  }
+
   const handlePush = async (project: Project) => {
     try {
       if (!window.electronAPI || !project.gitStatus) return
@@ -391,6 +399,17 @@ function Dashboard() {
                   )}
                 </div>
 
+                {/* Launch Claude Code Button */}
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    handleLaunchClaude(project.id)
+                  }}
+                  className="w-full px-3 py-2 mt-2 text-sm bg-gradient-to-r from-purple-500 to-blue-500 text-white rounded hover:opacity-90 transition font-medium"
+                >
+                  🤖 Launch Claude Code
+                </button>
+
                 {/* Git Actions */}
                 {project.gitStatus && (
                   <div className="grid grid-cols-2 gap-2 mt-2">
@@ -477,6 +496,18 @@ function Dashboard() {
             setBranchProjectId(null)
           }}
           onBranchChanged={loadProjects}
+        />
+      )}
+
+      {showContextModal && contextProjectId && (
+        <ContextPreviewModal
+          project={projects.find(p => p.id === contextProjectId)!}
+          testResults={testResults.get(contextProjectId)}
+          gitStatus={projects.find(p => p.id === contextProjectId)?.gitStatus}
+          onClose={() => {
+            setShowContextModal(false)
+            setContextProjectId(null)
+          }}
         />
       )}
     </div>

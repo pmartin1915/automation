@@ -127,6 +127,16 @@ const api = {
     get: () => ipcRenderer.invoke(IPC_CHANNELS.CONFIG_GET),
     update: (config: Partial<AppConfig>) =>
       ipcRenderer.invoke(IPC_CHANNELS.CONFIG_UPDATE, config)
+  },
+
+  // Context operations (Week 7)
+  context: {
+    getTemplates: () =>
+      ipcRenderer.invoke(IPC_CHANNELS.CONTEXT_GET_TEMPLATES),
+    generate: (projectId: string, templateId: string, options?: any) =>
+      ipcRenderer.invoke(IPC_CHANNELS.CONTEXT_GENERATE, { projectId, templateId, options }),
+    openExternal: (url: string) =>
+      ipcRenderer.invoke(IPC_CHANNELS.CONTEXT_OPEN_EXTERNAL, url)
   }
 }
 

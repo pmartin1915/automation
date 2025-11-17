@@ -110,6 +110,43 @@ export interface AppConfig {
   sessionAutoLink?: boolean  // Auto-link test runs and commits to active session
 }
 
+// Context generation types (Week 7)
+export interface ContextTemplate {
+  id: string
+  name: string
+  description: string
+  category: 'fix-tests' | 'add-feature' | 'refactor' | 'custom'
+}
+
+export interface FailingTest {
+  name: string
+  file: string
+  error: string
+  stackTrace?: string
+}
+
+export interface ContextData {
+  projectName: string
+  projectPath: string
+  language: string
+  testFramework: string
+  branch?: string
+  gitStatus?: GitStatus
+  testResults?: TestSuiteResult
+  failingTests?: FailingTest[]
+  sessionId?: string
+  sessionName?: string
+  sessionGoal?: string
+}
+
+export interface GeneratedContext {
+  template: string
+  content: string
+  projectId: string
+  timestamp: number
+  sessionId?: string
+}
+
 // IPC Channel names
 export const IPC_CHANNELS = {
   // Project operations
@@ -163,5 +200,10 @@ export const IPC_CHANNELS = {
 
   // Config operations
   CONFIG_GET: 'config:get',
-  CONFIG_UPDATE: 'config:update'
+  CONFIG_UPDATE: 'config:update',
+
+  // Context operations (Week 7)
+  CONTEXT_GENERATE: 'context:generate',
+  CONTEXT_GET_TEMPLATES: 'context:getTemplates',
+  CONTEXT_OPEN_EXTERNAL: 'context:openExternal'
 } as const
