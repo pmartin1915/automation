@@ -2,3 +2,5 @@
 .DS_Store
 *.log
 .env
+ui-mockup/node_modules
+ui-mockup/dist
