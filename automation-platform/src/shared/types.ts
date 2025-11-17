@@ -62,12 +62,41 @@ export interface GitStatus {
 
 export interface Session {
   id: string
+  name: string
+  description: string
+  goal?: string
   projectId: string
-  task: string
-  branch: string
-  timestamp: string
-  outcome?: 'success' | 'partial' | 'failed'
-  notes?: string
+  branchName?: string
+  status: 'planning' | 'in_progress' | 'paused' | 'completed' | 'blocked' | 'abandoned'
+  outcome?: 'success' | 'partial' | 'blocked' | 'abandoned'
+  notes: string  // markdown
+  createdAt: number
+  startedAt?: number
+  completedAt?: number
+  duration?: number  // milliseconds
+  testRunIds: string[]
+  commitShas: string[]
+}
+
+export interface SessionSummary {
+  totalSessions: number
+  completed: number
+  inProgress: number
+  successRate: number
+  avgDuration: number
+}
+
+export interface TestRun {
+  id: string
+  projectId: string
+  sessionId?: string
+  timestamp: number
+  duration: number
+  totalTests: number
+  passed: number
+  failed: number
+  skipped: number
+  results: TestResult[]
 }
 
 export interface AppConfig {
@@ -76,6 +105,9 @@ export interface AppConfig {
   defaultTestCommand?: string
   gitAutoPush: boolean
   branchNamingPattern: string
+  sessionAutoPause?: boolean  // Auto-pause sessions when app is idle
+  sessionIdleTimeout?: number  // Minutes before auto-pause
+  sessionAutoLink?: boolean  // Auto-link test runs and commits to active session
 }
 
 // IPC Channel names
@@ -117,7 +149,17 @@ export const IPC_CHANNELS = {
   // Session operations
   SESSION_CREATE: 'session:create',
   SESSION_GET_ALL: 'session:getAll',
+  SESSION_GET_BY_ID: 'session:getById',
   SESSION_UPDATE: 'session:update',
+  SESSION_DELETE: 'session:delete',
+  SESSION_START: 'session:start',
+  SESSION_PAUSE: 'session:pause',
+  SESSION_RESUME: 'session:resume',
+  SESSION_COMPLETE: 'session:complete',
+  SESSION_GET_BY_PROJECT: 'session:getByProject',
+  SESSION_GET_ANALYTICS: 'session:getAnalytics',
+  SESSION_LINK_TEST_RUN: 'session:linkTestRun',
+  SESSION_LINK_COMMIT: 'session:linkCommit',
 
   // Config operations
   CONFIG_GET: 'config:get',

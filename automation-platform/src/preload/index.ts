@@ -94,12 +94,32 @@ const api = {
 
   // Session operations
   sessions: {
-    create: (session: Partial<Session>) =>
-      ipcRenderer.invoke(IPC_CHANNELS.SESSION_CREATE, session),
-    getAll: (projectId: string) =>
-      ipcRenderer.invoke(IPC_CHANNELS.SESSION_GET_ALL, projectId),
-    update: (session: Session) =>
-      ipcRenderer.invoke(IPC_CHANNELS.SESSION_UPDATE, session)
+    create: (sessionData: Omit<Session, 'id' | 'createdAt' | 'testRunIds' | 'commitShas'>) =>
+      ipcRenderer.invoke(IPC_CHANNELS.SESSION_CREATE, sessionData),
+    getAll: () =>
+      ipcRenderer.invoke(IPC_CHANNELS.SESSION_GET_ALL),
+    getById: (sessionId: string) =>
+      ipcRenderer.invoke(IPC_CHANNELS.SESSION_GET_BY_ID, sessionId),
+    update: (id: string, updates: Partial<Session>) =>
+      ipcRenderer.invoke(IPC_CHANNELS.SESSION_UPDATE, { id, updates }),
+    delete: (sessionId: string) =>
+      ipcRenderer.invoke(IPC_CHANNELS.SESSION_DELETE, sessionId),
+    start: (sessionId: string) =>
+      ipcRenderer.invoke(IPC_CHANNELS.SESSION_START, sessionId),
+    pause: (sessionId: string) =>
+      ipcRenderer.invoke(IPC_CHANNELS.SESSION_PAUSE, sessionId),
+    resume: (sessionId: string) =>
+      ipcRenderer.invoke(IPC_CHANNELS.SESSION_RESUME, sessionId),
+    complete: (id: string, outcome: 'success' | 'partial' | 'blocked' | 'abandoned', notes?: string) =>
+      ipcRenderer.invoke(IPC_CHANNELS.SESSION_COMPLETE, { id, outcome, notes }),
+    getByProject: (projectId: string) =>
+      ipcRenderer.invoke(IPC_CHANNELS.SESSION_GET_BY_PROJECT, projectId),
+    getAnalytics: (projectId?: string) =>
+      ipcRenderer.invoke(IPC_CHANNELS.SESSION_GET_ANALYTICS, projectId),
+    linkTestRun: (sessionId: string, testRunId: string) =>
+      ipcRenderer.invoke(IPC_CHANNELS.SESSION_LINK_TEST_RUN, { sessionId, testRunId }),
+    linkCommit: (sessionId: string, commitSha: string) =>
+      ipcRenderer.invoke(IPC_CHANNELS.SESSION_LINK_COMMIT, { sessionId, commitSha })
   },
 
   // Config operations

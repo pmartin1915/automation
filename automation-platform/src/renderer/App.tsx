@@ -1,8 +1,11 @@
 import { useState } from 'react'
 import { Toaster } from 'react-hot-toast'
 import Dashboard from './pages/Dashboard'
+import { Sessions } from './pages/Sessions'
 
 function App() {
+  const [currentPage, setCurrentPage] = useState<'dashboard' | 'sessions' | 'settings'>('dashboard')
+
   return (
     <div className="h-screen w-screen flex flex-col overflow-hidden bg-background text-foreground">
       {/* Toast notifications */}
@@ -45,14 +48,35 @@ function App() {
         {/* Sidebar */}
         <aside className="w-64 border-r border-border bg-card p-4">
           <nav className="space-y-2">
-            <button className="w-full px-4 py-2 text-left rounded-md bg-primary text-primary-foreground hover:bg-primary/90 transition">
+            <button
+              onClick={() => setCurrentPage('dashboard')}
+              className={`w-full px-4 py-2 text-left rounded-md transition ${
+                currentPage === 'dashboard'
+                  ? 'bg-primary text-primary-foreground'
+                  : 'hover:bg-accent'
+              }`}
+            >
               📊 Dashboard
             </button>
-            <button className="w-full px-4 py-2 text-left rounded-md hover:bg-accent transition">
-              ⚙️ Settings
-            </button>
-            <button className="w-full px-4 py-2 text-left rounded-md hover:bg-accent transition">
+            <button
+              onClick={() => setCurrentPage('sessions')}
+              className={`w-full px-4 py-2 text-left rounded-md transition ${
+                currentPage === 'sessions'
+                  ? 'bg-primary text-primary-foreground'
+                  : 'hover:bg-accent'
+              }`}
+            >
               📝 Sessions
+            </button>
+            <button
+              onClick={() => setCurrentPage('settings')}
+              className={`w-full px-4 py-2 text-left rounded-md transition ${
+                currentPage === 'settings'
+                  ? 'bg-primary text-primary-foreground'
+                  : 'hover:bg-accent'
+              }`}
+            >
+              ⚙️ Settings
             </button>
           </nav>
 
@@ -66,7 +90,14 @@ function App() {
 
         {/* Main content */}
         <main className="flex-1 overflow-auto">
-          <Dashboard />
+          {currentPage === 'dashboard' && <Dashboard />}
+          {currentPage === 'sessions' && <Sessions />}
+          {currentPage === 'settings' && (
+            <div className="p-6">
+              <h2 className="text-2xl font-bold">Settings</h2>
+              <p className="text-muted-foreground mt-2">Settings page coming soon...</p>
+            </div>
+          )}
         </main>
       </div>
     </div>

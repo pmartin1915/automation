@@ -148,7 +148,10 @@ export class ConfigStore {
       projects: [],
       theme: 'auto',
       gitAutoPush: false,
-      branchNamingPattern: 'claude/{task}-v1'
+      branchNamingPattern: 'claude/{task}-v1',
+      sessionAutoPause: false,
+      sessionIdleTimeout: 15,
+      sessionAutoLink: true
     }
   }
 }

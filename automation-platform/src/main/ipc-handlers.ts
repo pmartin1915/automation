@@ -5,17 +5,20 @@ import { getConfigStore } from './services/ConfigStore'
 import { getTestRunner } from './services/TestRunner'
 import { getFileWatcher } from './services/FileWatcher'
 import { gitService } from './services/GitService'
+import { SessionService } from './services/SessionService'
 
 let projectManager: ReturnType<typeof getProjectManager>
 let configStore: ReturnType<typeof getConfigStore>
 let testRunner: ReturnType<typeof getTestRunner>
 let fileWatcher: ReturnType<typeof getFileWatcher>
+let sessionService: SessionService
 
 export function setupIpcHandlers() {
   projectManager = getProjectManager()
   configStore = getConfigStore()
   testRunner = getTestRunner()
   fileWatcher = getFileWatcher()
+  sessionService = SessionService.getInstance()
 
   // Setup event forwarding to renderer
   setupTestRunnerEvents()
@@ -188,22 +191,134 @@ export function setupIpcHandlers() {
   })
 
   // Session handlers
-  ipcMain.handle(IPC_CHANNELS.SESSION_CREATE, async (_event, session) => {
-    // TODO: Implement
-    console.log('Create session:', session)
-    return { success: true, session }
+  ipcMain.handle(IPC_CHANNELS.SESSION_CREATE, async (_event, sessionData) => {
+    try {
+      const session = await sessionService.createSession(sessionData)
+      return { success: true, session }
+    } catch (error: any) {
+      console.error('Error creating session:', error)
+      return { success: false, error: error.message }
+    }
   })
 
-  ipcMain.handle(IPC_CHANNELS.SESSION_GET_ALL, async (_event, projectId) => {
-    // TODO: Implement
-    console.log('Get all sessions:', projectId)
-    return []
+  ipcMain.handle(IPC_CHANNELS.SESSION_GET_ALL, async () => {
+    try {
+      const sessions = await sessionService.getAllSessions()
+      return { success: true, sessions }
+    } catch (error: any) {
+      console.error('Error getting sessions:', error)
+      return { success: false, error: error.message }
+    }
   })
 
-  ipcMain.handle(IPC_CHANNELS.SESSION_UPDATE, async (_event, session) => {
-    // TODO: Implement
-    console.log('Update session:', session)
-    return { success: true, session }
+  ipcMain.handle(IPC_CHANNELS.SESSION_GET_BY_ID, async (_event, sessionId) => {
+    try {
+      const session = await sessionService.getSessionById(sessionId)
+      return { success: true, session }
+    } catch (error: any) {
+      console.error('Error getting session:', error)
+      return { success: false, error: error.message }
+    }
+  })
+
+  ipcMain.handle(IPC_CHANNELS.SESSION_UPDATE, async (_event, { id, updates }) => {
+    try {
+      const session = await sessionService.updateSession(id, updates)
+      return { success: true, session }
+    } catch (error: any) {
+      console.error('Error updating session:', error)
+      return { success: false, error: error.message }
+    }
+  })
+
+  ipcMain.handle(IPC_CHANNELS.SESSION_DELETE, async (_event, sessionId) => {
+    try {
+      const deleted = await sessionService.deleteSession(sessionId)
+      return { success: deleted }
+    } catch (error: any) {
+      console.error('Error deleting session:', error)
+      return { success: false, error: error.message }
+    }
+  })
+
+  ipcMain.handle(IPC_CHANNELS.SESSION_START, async (_event, sessionId) => {
+    try {
+      const session = await sessionService.startSession(sessionId)
+      return { success: true, session }
+    } catch (error: any) {
+      console.error('Error starting session:', error)
+      return { success: false, error: error.message }
+    }
+  })
+
+  ipcMain.handle(IPC_CHANNELS.SESSION_PAUSE, async (_event, sessionId) => {
+    try {
+      const session = await sessionService.pauseSession(sessionId)
+      return { success: true, session }
+    } catch (error: any) {
+      console.error('Error pausing session:', error)
+      return { success: false, error: error.message }
+    }
+  })
+
+  ipcMain.handle(IPC_CHANNELS.SESSION_RESUME, async (_event, sessionId) => {
+    try {
+      const session = await sessionService.resumeSession(sessionId)
+      return { success: true, session }
+    } catch (error: any) {
+      console.error('Error resuming session:', error)
+      return { success: false, error: error.message }
+    }
+  })
+
+  ipcMain.handle(IPC_CHANNELS.SESSION_COMPLETE, async (_event, { id, outcome, notes }) => {
+    try {
+      const session = await sessionService.completeSession(id, outcome, notes)
+      return { success: true, session }
+    } catch (error: any) {
+      console.error('Error completing session:', error)
+      return { success: false, error: error.message }
+    }
+  })
+
+  ipcMain.handle(IPC_CHANNELS.SESSION_GET_BY_PROJECT, async (_event, projectId) => {
+    try {
+      const sessions = await sessionService.getSessionsByProject(projectId)
+      return { success: true, sessions }
+    } catch (error: any) {
+      console.error('Error getting sessions by project:', error)
+      return { success: false, error: error.message }
+    }
+  })
+
+  ipcMain.handle(IPC_CHANNELS.SESSION_GET_ANALYTICS, async (_event, projectId) => {
+    try {
+      const analytics = await sessionService.getSessionAnalytics(projectId)
+      return { success: true, analytics }
+    } catch (error: any) {
+      console.error('Error getting session analytics:', error)
+      return { success: false, error: error.message }
+    }
+  })
+
+  ipcMain.handle(IPC_CHANNELS.SESSION_LINK_TEST_RUN, async (_event, { sessionId, testRunId }) => {
+    try {
+      const linked = await sessionService.linkTestRun(sessionId, testRunId)
+      return { success: linked }
+    } catch (error: any) {
+      console.error('Error linking test run:', error)
+      return { success: false, error: error.message }
+    }
+  })
+
+  ipcMain.handle(IPC_CHANNELS.SESSION_LINK_COMMIT, async (_event, { sessionId, commitSha }) => {
+    try {
+      const linked = await sessionService.linkCommit(sessionId, commitSha)
+      return { success: linked }
+    } catch (error: any) {
+      console.error('Error linking commit:', error)
+      return { success: false, error: error.message }
+    }
   })
 
   console.log('IPC handlers registered')
