@@ -1,7 +1,7 @@
 {
-  "name": "automation-platform",
+  "name": "automation-station",
   "version": "1.0.0",
-  "description": "Visual desktop application for managing AI-assisted development",
+  "description": "Your central hub for managing AI-assisted development - all aboard the Automation Station! 🚂",
   "main": "dist/main/index.js",
   "scripts": {
     "dev:renderer": "vite",
@@ -47,8 +47,8 @@
     "zustand": "^5.0.8"
   },
   "build": {
-    "appId": "com.automation.platform",
-    "productName": "Automation Platform",
+    "appId": "com.automation.station",
+    "productName": "Automation Station",
     "directories": {
       "output": "release",
       "buildResources": "build"
@@ -95,7 +95,7 @@
           "path": "/Applications"
         }
       ],
-      "title": "Automation Platform Installer",
+      "title": "Automation Station Installer",
       "backgroundColor": "#1e293b"
     },
     "win": {
@@ -110,14 +110,14 @@
         }
       ],
       "icon": "build/icon.ico",
-      "publisherName": "Automation Platform"
+      "publisherName": "Automation Station"
     },
     "nsis": {
       "oneClick": false,
       "allowToChangeInstallationDirectory": true,
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
-      "shortcutName": "Automation Platform",
+      "shortcutName": "Automation Station",
       "installerIcon": "build/icon.ico",
       "uninstallerIcon": "build/icon.ico",
       "license": "LICENSE"
@@ -139,11 +139,11 @@
       ],
       "category": "Development",
       "icon": "build/icon.png",
-      "maintainer": "automation-platform",
-      "synopsis": "Visual desktop application for managing AI-assisted development",
+      "maintainer": "automation-station",
+      "synopsis": "Your central hub for AI-assisted development - all aboard! 🚂",
       "desktop": {
-        "Name": "Automation Platform",
-        "Comment": "Manage AI-assisted development workflows",
+        "Name": "Automation Station",
+        "Comment": "Your hub for managing AI-assisted development workflows",
         "Keywords": "development;testing;automation;ai;claude",
         "Terminal": false
       }

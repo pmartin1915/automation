@@ -1,4 +1,4 @@
-# Claude Automation Platform
+# Claude Automation Station
 
 **Visual desktop application for managing AI-assisted development across multiple projects**
 

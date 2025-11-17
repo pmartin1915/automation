@@ -1,8 +1,8 @@
-# Automation Platform - User Guide
+# Automation Station - User Guide
 
 **Version 1.0.0**
 
-Welcome to the Automation Platform! This guide will help you get started and make the most of all features.
+Welcome to the Automation Station! This guide will help you get started and make the most of all features.
 
 ---
 
@@ -39,7 +39,7 @@ Welcome to the Automation Platform! This guide will help you get started and mak
 1. Download `AutomationPlatform Setup 1.0.0.exe`
 2. Run the installer
 3. Follow the installation wizard
-4. Choose installation directory (default: `C:\Program Files\Automation Platform`)
+4. Choose installation directory (default: `C:\Program Files\Automation Station`)
 5. Launch from Start Menu or Desktop shortcut
 
 **Note:** Windows may show SmartScreen warning. Click "More info" → "Run anyway" (app is not yet code-signed).
@@ -85,7 +85,7 @@ automation-platform
 
 ### First Launch
 
-When you first launch the Automation Platform, you'll see an empty dashboard with a welcome message.
+When you first launch the Automation Station, you'll see an empty dashboard with a welcome message.
 
 **Quick Start:**
 1. Click "+ Add Project" or drag a project folder onto the window
@@ -665,5 +665,5 @@ Now that you know how to use the platform:
 
 ---
 
-*Automation Platform v1.0.0 - User Guide*
+*Automation Station v1.0.0 - User Guide*
 *Last updated: November 17, 2025*

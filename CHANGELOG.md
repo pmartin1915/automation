@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to the Automation Platform will be documented in this file.
+All notable changes to the Automation Station will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### 🎉 Initial Release
 
-The first official release of the Claude Code Automation Platform! A visual desktop application for managing AI-assisted development across multiple projects.
+The first official release of the Claude Code Automation Station! A visual desktop application for managing AI-assisted development across multiple projects.
 
 ### ✨ Added
 
@@ -118,14 +118,14 @@ The first official release of the Claude Code Automation Platform! A visual desk
 
 ### 🎁 User Impact
 
-**Before Automation Platform:**
+**Before Automation Station:**
 - Manual test running for each project
 - Terminal-only git operations
 - Scattered tools and context switching
 - No tracking of Claude Code effectiveness
 - Manual context creation for AI assistance
 
-**With Automation Platform:**
+**With Automation Station:**
 - Visual overview of all projects
 - One-click test running and git operations
 - All tools in one beautiful interface

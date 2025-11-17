@@ -340,7 +340,7 @@ Update project README with:
 {
   "build": {
     "appId": "com.automation.platform",
-    "productName": "Automation Platform",
+    "productName": "Automation Station",
     "directories": {
       "output": "release",
       "buildResources": "build"
@@ -442,9 +442,9 @@ signtool sign /f cert.pfx /p password /tr http://timestamp.digicert.com Automati
 
 **Release Notes Template:**
 ```markdown
-# 🎉 Automation Platform v1.0.0
+# 🎉 Automation Station v1.0.0
 
-The first official release of the Claude Code Automation Platform!
+The first official release of the Claude Code Automation Station!
 
 ## What is this?
 
@@ -526,7 +526,7 @@ Found a bug? Have a feature request? Open an issue!
 
 **Announcement Template:**
 ```
-🎉 Just released Automation Platform v1.0!
+🎉 Just released Automation Station v1.0!
 
 A visual desktop app for managing AI-assisted development:
 - Multi-project dashboard

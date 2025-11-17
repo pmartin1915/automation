@@ -1,4 +1,4 @@
-﻿# 🤖 Claude Code Automation Platform
+﻿# 🤖 Claude Code Automation Station
 
 **A visual desktop application for managing AI-assisted development across multiple projects**
 
@@ -6,7 +6,7 @@
 
 ## 🎯 What Is This?
 
-The **Claude Code Automation Platform** transforms scattered development workflows into a unified, visual command center. It combines:
+The **Claude Code Automation Station** transforms scattered development workflows into a unified, visual command center. It combines:
 
 - 🎨 **Intuitive visual interface** with drag-and-drop test management
 - 🧪 **Real-time test running** across all your projects
@@ -61,7 +61,7 @@ This script verifies your commits actually reached GitHub (not just the local pr
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│  🤖 Claude Automation Platform                    [_] [□] [X]                │
+│  🤖 Claude Automation Station                    [_] [□] [X]                │
 ├─────────────────────────────────────────────────────────────────────────────┤
 │                                                                               │
 │  ┌──────────────┐  ┌──────────────────────────────────────────────────────┐ │

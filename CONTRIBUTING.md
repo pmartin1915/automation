@@ -1,4 +1,4 @@
-# Contributing to Automation Platform
+# Contributing to Automation Station
 
 Thank you for your interest in contributing! This guide will help you get started with development.
 
@@ -79,7 +79,7 @@ Violations can be reported to the project maintainers. All complaints will be re
 ```bash
 # Fork the repo on GitHub, then clone your fork
 git clone https://github.com/YOUR-USERNAME/automation.git
-cd automation/automation-platform
+cd automation/automation-station
 ```
 
 ### 2. Install Dependencies
@@ -129,7 +129,7 @@ npm start
 ## Project Structure
 
 ```
-automation-platform/
+automation-station/
 ├── src/
 │   ├── main/              # Electron main process
 │   │   ├── index.ts       # Entry point
