@@ -121,10 +121,12 @@ test.describe('Automation Station App', () => {
 
     // Check if we have empty state OR project cards
     const hasEmptyState = await window.locator('h3:has-text("No Projects Yet")').count()
-    const hasProjectCards = await window.locator('[data-testid="project-card"]').count()
+
+    // Project cards have h3 with project name and specific classes
+    const projectCardHeaders = await window.locator('h3.font-bold.text-xl.mb-2').count()
 
     // Should have either empty state or projects, not both
-    expect(hasEmptyState + hasProjectCards).toBeGreaterThan(0)
+    expect(hasEmptyState + projectCardHeaders).toBeGreaterThan(0)
 
     await electronApp.close()
   })
