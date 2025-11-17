@@ -110,8 +110,7 @@
           "arch": ["x64"]
         }
       ],
-      "icon": "build/icon.ico",
-      "publisherName": "Automation Station"
+      "icon": "build/icon.ico"
     },
     "nsis": {
       "oneClick": false,
@@ -141,13 +140,7 @@
       "category": "Development",
       "icon": "build/icon.png",
       "maintainer": "automation-station",
-      "synopsis": "Your central hub for AI-assisted development - all aboard! 🚂",
-      "desktop": {
-        "Name": "Automation Station",
-        "Comment": "Your hub for managing AI-assisted development workflows",
-        "Keywords": "development;testing;automation;ai;claude",
-        "Terminal": false
-      }
+      "synopsis": "Your central hub for AI-assisted development - all aboard! 🚂"
     }
   }
 }
