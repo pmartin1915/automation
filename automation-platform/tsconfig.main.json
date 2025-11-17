@@ -12,7 +12,8 @@
     "resolveJsonModule": true,
     "moduleResolution": "node",
     "outDir": "./dist/main",
-    "rootDir": "./src"
+    "rootDir": "./src",
+    "composite": true
   },
   "include": ["src/main/**/*", "src/shared/**/*"],
   "exclude": ["node_modules"]

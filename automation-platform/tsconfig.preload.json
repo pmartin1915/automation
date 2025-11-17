@@ -9,7 +9,8 @@
     "resolveJsonModule": true,
     "moduleResolution": "node",
     "outDir": "./dist/preload",
-    "rootDir": "./src"
+    "rootDir": "./src",
+    "composite": true
   },
   "include": ["src/preload/**/*", "src/shared/**/*"],
   "exclude": ["node_modules"]
