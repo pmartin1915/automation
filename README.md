@@ -18,6 +18,25 @@ The **Claude Code Automation Platform** transforms scattered development workflo
 
 ---
 
+## 🚨 IMPORTANT: Claude Code Web Users
+
+**If you're using Claude Code Web, READ THIS FIRST:**
+
+Claude Code Web has a git synchronization issue where commits may not reach GitHub between sessions. This causes work to appear "lost" in the next session.
+
+**Solution: Use our verification scripts**
+
+Before ending ANY session:
+```bash
+./scripts/safe-commit-push.sh "your commit message"
+```
+
+This script verifies your commits actually reached GitHub (not just the local proxy).
+
+**📖 Full guide:** [Claude Code Web Git Fix](docs/CLAUDE_CODE_WEB_GIT_FIX.md)
+
+---
+
 ## 📖 Complete Documentation
 
 ### **Vision & Strategy**
@@ -27,8 +46,14 @@ The **Claude Code Automation Platform** transforms scattered development workflo
 
 ### **Claude Code Integration**
 - [🤖 Claude Code Integration Guide](docs/CLAUDE_CODE_INTEGRATION.md) - Context generation, session tracking, best practices
+- [🔧 Claude Code Web Git Fix](docs/CLAUDE_CODE_WEB_GIT_FIX.md) - **CRITICAL**: Fix for git sync issues between sessions
 - [📝 Claude Workflow](docs/CLAUDE_WORKFLOW.md) - How Claude uses TDD to fix tests autonomously
 - [🌿 Branch Management](docs/BRANCH_MANAGEMENT.md) - Multi-session branch strategy
+
+### **Automation Scripts**
+- [safe-commit-push.sh](scripts/safe-commit-push.sh) - Commit and push with GitHub verification
+- [verify-push.sh](scripts/verify-push.sh) - Verify commits reached GitHub
+- [session-start.sh](scripts/session-start.sh) - Start sessions correctly with file verification
 
 ---
 
