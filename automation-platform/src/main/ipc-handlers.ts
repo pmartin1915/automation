@@ -1,14 +1,20 @@
-import { ipcMain } from 'electron'
+import { ipcMain, BrowserWindow } from 'electron'
 import { IPC_CHANNELS } from '../shared/types'
 import { getProjectManager } from './services/ProjectManager'
 import { getConfigStore } from './services/ConfigStore'
+import { getTestRunner } from './services/TestRunner'
 
 let projectManager: ReturnType<typeof getProjectManager>
 let configStore: ReturnType<typeof getConfigStore>
+let testRunner: ReturnType<typeof getTestRunner>
 
 export function setupIpcHandlers() {
   projectManager = getProjectManager()
   configStore = getConfigStore()
+  testRunner = getTestRunner()
+
+  // Setup test runner event forwarding to renderer
+  setupTestRunnerEvents()
 
   // Project handlers
   ipcMain.handle(IPC_CHANNELS.PROJECT_GET_ALL, async () => {
@@ -34,15 +40,19 @@ export function setupIpcHandlers() {
 
   // Test handlers
   ipcMain.handle(IPC_CHANNELS.TEST_RUN, async (_event, { projectId, testFile }) => {
-    // TODO: Implement
-    console.log('Run test:', projectId, testFile)
-    return { success: true }
+    return await testRunner.runTests(projectId, testFile)
   })
 
   ipcMain.handle(IPC_CHANNELS.TEST_RUN_ALL, async (_event, projectId) => {
-    // TODO: Implement
-    console.log('Run all tests:', projectId)
-    return { success: true }
+    return await testRunner.runTests(projectId)
+  })
+
+  ipcMain.handle(IPC_CHANNELS.TEST_DISCOVER_FILES, async (_event, projectId) => {
+    return await testRunner.discoverTestFiles(projectId)
+  })
+
+  ipcMain.handle(IPC_CHANNELS.TEST_KILL, async (_event, projectId) => {
+    return { success: testRunner.killTestProcess(projectId) }
   })
 
   // Git handlers
@@ -123,4 +133,39 @@ export function setupIpcHandlers() {
   })
 
   console.log('IPC handlers registered')
+}
+
+/**
+ * Setup event forwarding from TestRunner to renderer process
+ */
+function setupTestRunnerEvents() {
+  const sendToRenderer = (channel: string, data: any) => {
+    const windows = BrowserWindow.getAllWindows()
+    windows.forEach(window => {
+      window.webContents.send(channel, data)
+    })
+  }
+
+  // Forward test events to renderer
+  testRunner.on('test:started', (data) => {
+    sendToRenderer(IPC_CHANNELS.TEST_STARTED, data)
+  })
+
+  testRunner.on('test:output', (data) => {
+    sendToRenderer(IPC_CHANNELS.TEST_OUTPUT, data)
+  })
+
+  testRunner.on('test:complete', (data) => {
+    sendToRenderer(IPC_CHANNELS.TEST_COMPLETE, data)
+  })
+
+  testRunner.on('test:error', (data) => {
+    sendToRenderer(IPC_CHANNELS.TEST_ERROR, data)
+  })
+
+  testRunner.on('test:killed', (data) => {
+    sendToRenderer(IPC_CHANNELS.TEST_KILLED, data)
+  })
+
+  console.log('Test runner event forwarding setup')
 }

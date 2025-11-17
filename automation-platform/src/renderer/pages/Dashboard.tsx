@@ -3,13 +3,67 @@ import { useStore } from '../store/useStore'
 import type { Project } from '../../shared/types'
 
 function Dashboard() {
-  const { projects, setProjects } = useStore()
+  const {
+    projects,
+    setProjects,
+    testResults,
+    runningTests,
+    setTestRunning,
+    setTestResult,
+    addTestOutput,
+    clearTestOutput
+  } = useStore()
   const [showAddModal, setShowAddModal] = useState(false)
+  const [selectedProject, setSelectedProject] = useState<string | null>(null)
 
   useEffect(() => {
     // Load projects from Electron API on mount
     loadProjects()
+
+    // Setup test event listeners
+    setupTestListeners()
+
+    // Cleanup on unmount
+    return () => {
+      cleanupTestListeners()
+    }
   }, [])
+
+  const setupTestListeners = () => {
+    if (!window.electronAPI) return
+
+    // Test started
+    window.electronAPI.tests.onStarted((data) => {
+      setTestRunning(data.projectId, true)
+      clearTestOutput(data.projectId)
+    })
+
+    // Test output
+    window.electronAPI.tests.onOutput((data) => {
+      addTestOutput(data.projectId, data.output)
+    })
+
+    // Test complete
+    window.electronAPI.tests.onComplete((data) => {
+      setTestResult(data.projectId, data.results)
+      setTestRunning(data.projectId, false)
+    })
+
+    // Test error
+    window.electronAPI.tests.onError((data) => {
+      console.error('Test error:', data.error)
+      setTestRunning(data.projectId, false)
+    })
+
+    // Test killed
+    window.electronAPI.tests.onKilled((data) => {
+      setTestRunning(data.projectId, false)
+    })
+  }
+
+  const cleanupTestListeners = () => {
+    // Event listeners will be cleaned up by the preload script's removeListener
+  }
 
   const loadProjects = async () => {
     try {
@@ -24,6 +78,23 @@ function Dashboard() {
 
   const handleAddProject = () => {
     setShowAddModal(true)
+  }
+
+  const handleRunTests = async (projectId: string) => {
+    try {
+      if (!window.electronAPI) return
+
+      const result = await window.electronAPI.tests.runAll(projectId)
+      if (!result.success) {
+        console.error('Failed to run tests:', result.error)
+      }
+    } catch (error) {
+      console.error('Error running tests:', error)
+    }
+  }
+
+  const handleViewResults = (projectId: string) => {
+    setSelectedProject(projectId)
   }
 
   return (
@@ -59,10 +130,18 @@ function Dashboard() {
               <div className="flex items-start justify-between mb-4">
                 <div>
                   <h3 className="font-semibold text-lg mb-1">{project.name}</h3>
-                  <p className="text-sm text-muted-foreground">{project.path}</p>
+                  <p className="text-sm text-muted-foreground truncate">{project.path}</p>
                 </div>
                 <div className="text-2xl">
-                  {project.testsPassing === project.testsTotal ? '✅' : '⚠️'}
+                  {(() => {
+                    const result = testResults.get(project.id)
+                    const isRunning = runningTests.has(project.id)
+                    if (isRunning) return '🔄'
+                    if (!result) return '❓'
+                    if (result.failed > 0) return '❌'
+                    if (result.passed > 0) return '✅'
+                    return '❓'
+                  })()}
                 </div>
               </div>
 
@@ -84,13 +163,34 @@ function Dashboard() {
                   </div>
                 )}
 
+                {testResults.get(project.id) && (
+                  <div className="flex items-center justify-between text-sm py-2 px-3 bg-accent/50 rounded">
+                    <span className="text-muted-foreground">Tests</span>
+                    <span className="font-mono text-xs">
+                      <span className="text-green-500">✓ {testResults.get(project.id)!.passed}</span>
+                      {testResults.get(project.id)!.failed > 0 && (
+                        <span className="text-red-500 ml-2">✗ {testResults.get(project.id)!.failed}</span>
+                      )}
+                    </span>
+                  </div>
+                )}
+
                 <div className="flex gap-2 mt-4">
-                  <button className="flex-1 px-3 py-2 text-sm border border-border rounded hover:bg-accent transition">
-                    🧪 Run Tests
+                  <button
+                    onClick={() => handleRunTests(project.id)}
+                    disabled={runningTests.has(project.id)}
+                    className="flex-1 px-3 py-2 text-sm border border-border rounded hover:bg-accent transition disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {runningTests.has(project.id) ? '⏳ Running...' : '🧪 Run Tests'}
                   </button>
-                  <button className="flex-1 px-3 py-2 text-sm bg-primary text-primary-foreground rounded hover:bg-primary/90 transition">
-                    🚀 Claude
-                  </button>
+                  {testResults.get(project.id) && (
+                    <button
+                      onClick={() => handleViewResults(project.id)}
+                      className="flex-1 px-3 py-2 text-sm bg-primary text-primary-foreground rounded hover:bg-primary/90 transition"
+                    >
+                      📊 View Results
+                    </button>
+                  )}
                 </div>
               </div>
             </div>
@@ -102,6 +202,13 @@ function Dashboard() {
         <AddProjectModal
           onClose={() => setShowAddModal(false)}
           onProjectAdded={loadProjects}
+        />
+      )}
+
+      {selectedProject && (
+        <TestResultsModal
+          projectId={selectedProject}
+          onClose={() => setSelectedProject(null)}
         />
       )}
     </div>
@@ -206,6 +313,94 @@ function AddProjectModal({ onClose, onProjectAdded }: {
             </button>
           </div>
         </form>
+      </div>
+    </div>
+  )
+}
+
+// Test Results Modal
+function TestResultsModal({ projectId, onClose }: {
+  projectId: string
+  onClose: () => void
+}) {
+  const { projects, testResults, testOutput } = useStore()
+  const project = projects.find(p => p.id === projectId)
+  const result = testResults.get(projectId)
+  const output = testOutput.get(projectId) || []
+
+  if (!project) return null
+
+  return (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+      <div className="bg-card border border-border rounded-lg w-full max-w-4xl max-h-[80vh] flex flex-col">
+        {/* Header */}
+        <div className="p-6 border-b border-border">
+          <div className="flex items-start justify-between">
+            <div>
+              <h2 className="text-xl font-semibold mb-1">Test Results</h2>
+              <p className="text-sm text-muted-foreground">{project.name}</p>
+            </div>
+            <button
+              onClick={onClose}
+              className="text-muted-foreground hover:text-foreground transition"
+            >
+              ✕
+            </button>
+          </div>
+
+          {/* Summary */}
+          {result && (
+            <div className="mt-4 flex gap-4 text-sm">
+              <div className="px-3 py-2 bg-accent/50 rounded">
+                <span className="text-muted-foreground">Total: </span>
+                <span className="font-semibold">{result.totalTests}</span>
+              </div>
+              <div className="px-3 py-2 bg-green-500/10 text-green-500 rounded">
+                <span className="font-semibold">✓ {result.passed} Passed</span>
+              </div>
+              {result.failed > 0 && (
+                <div className="px-3 py-2 bg-red-500/10 text-red-500 rounded">
+                  <span className="font-semibold">✗ {result.failed} Failed</span>
+                </div>
+              )}
+              {result.skipped > 0 && (
+                <div className="px-3 py-2 bg-yellow-500/10 text-yellow-500 rounded">
+                  <span className="font-semibold">○ {result.skipped} Skipped</span>
+                </div>
+              )}
+              <div className="px-3 py-2 bg-accent/50 rounded">
+                <span className="text-muted-foreground">Duration: </span>
+                <span className="font-semibold">{(result.duration / 1000).toFixed(2)}s</span>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Output */}
+        <div className="flex-1 overflow-auto p-6">
+          <h3 className="text-sm font-semibold mb-3 text-muted-foreground">Test Output</h3>
+          <div className="bg-black/50 rounded-lg p-4 font-mono text-xs overflow-auto">
+            {output.length > 0 ? (
+              output.map((line, i) => (
+                <div key={i} className="whitespace-pre-wrap">
+                  {line}
+                </div>
+              ))
+            ) : (
+              <div className="text-muted-foreground">No output available</div>
+            )}
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div className="p-6 border-t border-border">
+          <button
+            onClick={onClose}
+            className="w-full px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition"
+          >
+            Close
+          </button>
+        </div>
       </div>
     </div>
   )

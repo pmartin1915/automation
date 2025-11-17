@@ -20,15 +20,34 @@ const api = {
       ipcRenderer.invoke(IPC_CHANNELS.TEST_RUN, { projectId, testFile }),
     runAll: (projectId: string) =>
       ipcRenderer.invoke(IPC_CHANNELS.TEST_RUN_ALL, projectId),
-    onOutput: (callback: (data: { projectId: string; output: string }) => void) => {
+    discoverFiles: (projectId: string) =>
+      ipcRenderer.invoke(IPC_CHANNELS.TEST_DISCOVER_FILES, projectId),
+    kill: (projectId: string) =>
+      ipcRenderer.invoke(IPC_CHANNELS.TEST_KILL, projectId),
+    onStarted: (callback: (data: { projectId: string; project: string }) => void) => {
+      const listener = (_event: any, data: any) => callback(data)
+      ipcRenderer.on(IPC_CHANNELS.TEST_STARTED, listener)
+      return () => ipcRenderer.removeListener(IPC_CHANNELS.TEST_STARTED, listener)
+    },
+    onOutput: (callback: (data: { projectId: string; output: string; type: string }) => void) => {
       const listener = (_event: any, data: any) => callback(data)
       ipcRenderer.on(IPC_CHANNELS.TEST_OUTPUT, listener)
       return () => ipcRenderer.removeListener(IPC_CHANNELS.TEST_OUTPUT, listener)
     },
-    onComplete: (callback: (result: TestSuiteResult) => void) => {
-      const listener = (_event: any, result: any) => callback(result)
+    onComplete: (callback: (data: { projectId: string; results: TestSuiteResult; duration: number; exitCode: number }) => void) => {
+      const listener = (_event: any, data: any) => callback(data)
       ipcRenderer.on(IPC_CHANNELS.TEST_COMPLETE, listener)
       return () => ipcRenderer.removeListener(IPC_CHANNELS.TEST_COMPLETE, listener)
+    },
+    onError: (callback: (data: { projectId: string; error: string }) => void) => {
+      const listener = (_event: any, data: any) => callback(data)
+      ipcRenderer.on(IPC_CHANNELS.TEST_ERROR, listener)
+      return () => ipcRenderer.removeListener(IPC_CHANNELS.TEST_ERROR, listener)
+    },
+    onKilled: (callback: (data: { projectId: string }) => void) => {
+      const listener = (_event: any, data: any) => callback(data)
+      ipcRenderer.on(IPC_CHANNELS.TEST_KILLED, listener)
+      return () => ipcRenderer.removeListener(IPC_CHANNELS.TEST_KILLED, listener)
     }
   },
 

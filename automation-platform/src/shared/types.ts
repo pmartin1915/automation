@@ -88,8 +88,13 @@ export const IPC_CHANNELS = {
   // Test operations
   TEST_RUN: 'test:run',
   TEST_RUN_ALL: 'test:runAll',
+  TEST_DISCOVER_FILES: 'test:discoverFiles',
+  TEST_KILL: 'test:kill',
+  TEST_STARTED: 'test:started',
   TEST_OUTPUT: 'test:output',
   TEST_COMPLETE: 'test:complete',
+  TEST_ERROR: 'test:error',
+  TEST_KILLED: 'test:killed',
 
   // Git operations
   GIT_STATUS: 'git:status',
