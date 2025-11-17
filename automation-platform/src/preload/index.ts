@@ -137,6 +137,18 @@ const api = {
       ipcRenderer.invoke(IPC_CHANNELS.CONTEXT_GENERATE, { projectId, templateId, options }),
     openExternal: (url: string) =>
       ipcRenderer.invoke(IPC_CHANNELS.CONTEXT_OPEN_EXTERNAL, url)
+  },
+
+  // Activity operations (Week 8)
+  activity: {
+    getByProject: (projectId: string, limit?: number) =>
+      ipcRenderer.invoke(IPC_CHANNELS.ACTIVITY_GET_BY_PROJECT, { projectId, limit }),
+    getGlobal: (limit?: number) =>
+      ipcRenderer.invoke(IPC_CHANNELS.ACTIVITY_GET_GLOBAL, limit),
+    getMetrics: (projectId?: string) =>
+      ipcRenderer.invoke(IPC_CHANNELS.ACTIVITY_GET_METRICS, projectId),
+    log: (activity: any) =>
+      ipcRenderer.invoke(IPC_CHANNELS.ACTIVITY_LOG, activity)
   }
 }
 

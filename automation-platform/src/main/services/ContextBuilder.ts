@@ -217,20 +217,39 @@ export class ContextBuilder {
       lines.push('')
     }
 
-    // Suggested Tasks
-    lines.push('## Suggested Tasks')
+    // Enhanced Task Checklist (Week 8)
+    lines.push('## Task Checklist')
     lines.push('')
 
     if (data.failingTests && data.failingTests.length > 0) {
-      lines.push('- [ ] Review each failing test error message')
-      lines.push('- [ ] Identify the root cause of failures')
-      lines.push('- [ ] Fix implementation code or update tests')
-      lines.push('- [ ] Re-run tests to verify fixes')
-      lines.push('- [ ] Commit changes with descriptive message')
+      lines.push('### Immediate Actions')
+      data.failingTests.forEach((test, index) => {
+        // Extract key info from error message for actionable task
+        const errorSummary = test.error.split('\n')[0].substring(0, 100)
+        lines.push(`- [ ] Fix test ${index + 1}: "${test.name}" in \`${test.file}\``)
+        lines.push(`  - Error: ${errorSummary}`)
+      })
+      lines.push('')
+
+      lines.push('### Verification')
+      lines.push('- [ ] Re-run failing tests individually to verify fixes')
+      lines.push('- [ ] Run full test suite to check for regressions')
+      lines.push('- [ ] Verify no new test failures introduced')
+      lines.push('')
+
+      lines.push('### Completion')
+      if (data.gitStatus?.isDirty) {
+        lines.push('- [ ] Review all changes: `git diff`')
+      }
+      lines.push('- [ ] Commit changes: `git add . && git commit -m "fix: resolve test failures"`')
+      if (data.sessionId) {
+        lines.push('- [ ] Update session notes with fix summary')
+        lines.push('- [ ] Mark session as complete with outcome')
+      }
     } else {
-      lines.push('- [ ] Run tests to identify failures')
-      lines.push('- [ ] Review test output for errors')
-      lines.push('- [ ] Fix any failing tests')
+      lines.push('- [ ] Run tests to identify failures: `npm test` or equivalent')
+      lines.push('- [ ] Review test output for detailed error messages')
+      lines.push('- [ ] Generate new context with failing test details')
     }
 
     lines.push('')
@@ -295,16 +314,46 @@ export class ContextBuilder {
       lines.push('')
     }
 
-    // Suggested Tasks
+    // Enhanced Implementation Checklist (Week 8)
     lines.push('## Implementation Checklist')
     lines.push('')
-    lines.push('- [ ] Design feature architecture')
-    lines.push('- [ ] Write tests for new feature (TDD)')
-    lines.push('- [ ] Implement feature code')
-    lines.push('- [ ] Ensure all tests pass')
-    lines.push('- [ ] Update documentation')
-    lines.push('- [ ] Review and refactor if needed')
-    lines.push('- [ ] Commit changes')
+
+    lines.push('### Planning')
+    if (data.sessionGoal) {
+      lines.push('- [ ] Review feature requirements and acceptance criteria')
+    }
+    lines.push('- [ ] Identify files that need to be created/modified')
+    lines.push('- [ ] Plan component/module structure')
+    lines.push('- [ ] Consider edge cases and error scenarios')
+    lines.push('')
+
+    lines.push('### Implementation')
+    lines.push('- [ ] Write tests for new feature (TDD approach)')
+    if (data.language === 'TypeScript' || data.language === 'JavaScript') {
+      lines.push('- [ ] Create/update TypeScript interfaces and types')
+    }
+    lines.push('- [ ] Implement core feature functionality')
+    lines.push('- [ ] Add error handling and validation')
+    lines.push('- [ ] Add logging/debugging as needed')
+    lines.push('')
+
+    lines.push('### Testing & Verification')
+    lines.push(`- [ ] Run tests: \`${data.testFramework}\` command`)
+    lines.push('- [ ] Verify all new tests pass')
+    if (data.testResults && data.testResults.passed > 0) {
+      lines.push('- [ ] Ensure existing tests still pass (no regressions)')
+    }
+    lines.push('- [ ] Test feature manually in development environment')
+    lines.push('')
+
+    lines.push('### Completion')
+    lines.push('- [ ] Code review: Check for code quality and best practices')
+    lines.push('- [ ] Update documentation (README, inline comments)')
+    lines.push('- [ ] Commit: `git add . && git commit -m "feat: <description>"`')
+    if (data.sessionId) {
+      lines.push('- [ ] Update session notes')
+      lines.push('- [ ] Mark session as complete')
+    }
     lines.push('')
     lines.push('---')
     lines.push('')
@@ -350,16 +399,53 @@ export class ContextBuilder {
       lines.push('')
     }
 
-    // Suggested Tasks
+    // Enhanced Refactoring Checklist (Week 8)
     lines.push('## Refactoring Checklist')
     lines.push('')
-    lines.push('- [ ] Identify code smells or areas for improvement')
-    lines.push('- [ ] Ensure tests are passing before refactoring')
-    lines.push('- [ ] Make incremental refactoring changes')
-    lines.push('- [ ] Run tests after each change')
+
+    lines.push('### Pre-Refactoring')
+    if (data.testResults) {
+      const allPassing = data.testResults.failed === 0 && data.testResults.passed > 0
+      if (allPassing) {
+        lines.push(`- [x] Baseline tests passing (${data.testResults.passed}/${data.testResults.totalTests})`)
+      } else {
+        lines.push(`- [ ] Fix failing tests first (${data.testResults.failed} failing)`)
+      }
+    } else {
+      lines.push('- [ ] Run tests to establish baseline')
+    }
+    if (data.gitStatus && !data.gitStatus.isDirty) {
+      lines.push('- [x] Working directory clean')
+    } else {
+      lines.push('- [ ] Commit or stash current changes')
+    }
+    if (data.sessionGoal) {
+      lines.push('- [ ] Review refactoring goals and scope')
+    }
+    lines.push('')
+
+    lines.push('### Refactoring Process')
+    lines.push('- [ ] Identify code smells: duplication, long functions, complex logic')
+    lines.push('- [ ] Make small, incremental changes')
+    lines.push('- [ ] Run tests after each small change')
+    lines.push('- [ ] Keep refactoring focused on one area at a time')
+    lines.push('- [ ] Preserve existing functionality (no behavior changes)')
+    lines.push('')
+
+    lines.push('### Verification')
+    lines.push('- [ ] Run full test suite')
     lines.push('- [ ] Verify all tests still pass')
-    lines.push('- [ ] Update documentation if needed')
-    lines.push('- [ ] Commit refactoring changes')
+    lines.push('- [ ] Review code quality improvements')
+    lines.push('- [ ] Check for unintended side effects')
+    lines.push('')
+
+    lines.push('### Completion')
+    lines.push('- [ ] Update inline documentation if needed')
+    lines.push('- [ ] Commit: `git add . && git commit -m "refactor: <description>"`')
+    if (data.sessionId) {
+      lines.push('- [ ] Document refactoring decisions in session notes')
+      lines.push('- [ ] Mark session as complete')
+    }
     lines.push('')
     lines.push('---')
     lines.push('')

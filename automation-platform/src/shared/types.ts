@@ -147,6 +147,47 @@ export interface GeneratedContext {
   sessionId?: string
 }
 
+// Activity tracking types (Week 8)
+export interface Activity {
+  id: string
+  projectId: string
+  type: 'session' | 'test_run' | 'commit' | 'file_change'
+  timestamp: number
+  title: string
+  description: string
+  metadata: {
+    sessionId?: string
+    sessionName?: string
+    sessionStatus?: string
+    testRunId?: string
+    testsPassed?: number
+    testsFailed?: number
+    commitSha?: string
+    commitMessage?: string
+    files?: string[]
+    outcome?: string
+  }
+}
+
+// Analytics types (Week 8)
+export interface SuccessMetrics {
+  totalSessions: number
+  completedSessions: number
+  successfulSessions: number
+  successRate: number
+  avgDuration: number
+  testFixSuccessRate: number
+  featureAddSuccessRate: number
+  refactorSuccessRate: number
+}
+
+export interface TrendData {
+  date: string
+  sessionsCompleted: number
+  successRate: number
+  testsFixed: number
+}
+
 // IPC Channel names
 export const IPC_CHANNELS = {
   // Project operations
@@ -205,5 +246,11 @@ export const IPC_CHANNELS = {
   // Context operations (Week 7)
   CONTEXT_GENERATE: 'context:generate',
   CONTEXT_GET_TEMPLATES: 'context:getTemplates',
-  CONTEXT_OPEN_EXTERNAL: 'context:openExternal'
+  CONTEXT_OPEN_EXTERNAL: 'context:openExternal',
+
+  // Activity operations (Week 8)
+  ACTIVITY_LOG: 'activity:log',
+  ACTIVITY_GET_BY_PROJECT: 'activity:getByProject',
+  ACTIVITY_GET_GLOBAL: 'activity:getGlobal',
+  ACTIVITY_GET_METRICS: 'activity:getMetrics'
 } as const

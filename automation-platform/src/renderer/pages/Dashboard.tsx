@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
 import { useStore } from '../store/useStore'
 import { ContextPreviewModal } from '../components/ContextPreviewModal'
+import { ActivityFeed } from '../components/ActivityFeed'
+import { MetricsWidget } from '../components/MetricsWidget'
 import type { Project } from '../../shared/types'
 
 function Dashboard() {
@@ -256,6 +258,17 @@ function Dashboard() {
 
   return (
     <div className="p-8">
+      {/* Week 8: Activity Feed and Metrics */}
+      {projects.length > 0 && (
+        <div className="mb-8 grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Metrics Widget */}
+          <MetricsWidget />
+
+          {/* Activity Feed */}
+          <ActivityFeed showProjectName={true} projects={projects} limit={20} />
+        </div>
+      )}
+
       <div className="mb-8">
         <h2 className="text-2xl font-bold mb-2">Projects</h2>
         <p className="text-muted-foreground">

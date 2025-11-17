@@ -7,12 +7,14 @@ import { getFileWatcher } from './services/FileWatcher'
 import { gitService } from './services/GitService'
 import { SessionService } from './services/SessionService'
 import { contextBuilder } from './services/ContextBuilder'
+import { ActivityService } from './services/ActivityService'
 
 let projectManager: ReturnType<typeof getProjectManager>
 let configStore: ReturnType<typeof getConfigStore>
 let testRunner: ReturnType<typeof getTestRunner>
 let fileWatcher: ReturnType<typeof getFileWatcher>
 let sessionService: SessionService
+let activityService: ActivityService
 
 export function setupIpcHandlers() {
   projectManager = getProjectManager()
@@ -20,6 +22,11 @@ export function setupIpcHandlers() {
   testRunner = getTestRunner()
   fileWatcher = getFileWatcher()
   sessionService = SessionService.getInstance()
+  activityService = ActivityService.getInstance()
+
+  // Initialize services
+  sessionService.initialize()
+  activityService.initialize()
 
   // Setup event forwarding to renderer
   setupTestRunnerEvents()
@@ -119,6 +126,18 @@ export function setupIpcHandlers() {
   ipcMain.handle(IPC_CHANNELS.GIT_COMMIT, async (_event, { projectPath, message, files }) => {
     try {
       const success = await gitService.commit(projectPath, message, files)
+
+      // Log activity
+      if (success) {
+        const projects = projectManager.getAllProjects()
+        const project = projects.find(p => p.path === projectPath)
+        if (project) {
+          // Get the commit SHA from git log
+          const status = await gitService.getStatus(projectPath)
+          await activityService.onCommit(project.id, project.name, 'HEAD', message)
+        }
+      }
+
       return { success }
     } catch (error: any) {
       console.error('Error committing:', error)
@@ -195,6 +214,13 @@ export function setupIpcHandlers() {
   ipcMain.handle(IPC_CHANNELS.SESSION_CREATE, async (_event, sessionData) => {
     try {
       const session = await sessionService.createSession(sessionData)
+
+      // Log activity
+      const project = projectManager.getProject(session.projectId)
+      if (project) {
+        await activityService.onSessionCreated(session, project.name)
+      }
+
       return { success: true, session }
     } catch (error: any) {
       console.error('Error creating session:', error)
@@ -245,6 +271,13 @@ export function setupIpcHandlers() {
   ipcMain.handle(IPC_CHANNELS.SESSION_START, async (_event, sessionId) => {
     try {
       const session = await sessionService.startSession(sessionId)
+
+      // Log activity
+      const project = projectManager.getProject(session.projectId)
+      if (project) {
+        await activityService.onSessionStarted(session, project.name)
+      }
+
       return { success: true, session }
     } catch (error: any) {
       console.error('Error starting session:', error)
@@ -275,6 +308,13 @@ export function setupIpcHandlers() {
   ipcMain.handle(IPC_CHANNELS.SESSION_COMPLETE, async (_event, { id, outcome, notes }) => {
     try {
       const session = await sessionService.completeSession(id, outcome, notes)
+
+      // Log activity
+      const project = projectManager.getProject(session.projectId)
+      if (project) {
+        await activityService.onSessionCompleted(session, project.name)
+      }
+
       return { success: true, session }
     } catch (error: any) {
       console.error('Error completing session:', error)
@@ -358,6 +398,47 @@ export function setupIpcHandlers() {
     }
   })
 
+  // Activity handlers (Week 8)
+  ipcMain.handle(IPC_CHANNELS.ACTIVITY_GET_BY_PROJECT, async (_event, { projectId, limit }) => {
+    try {
+      const activities = await activityService.getActivitiesByProject(projectId, limit)
+      return { success: true, activities }
+    } catch (error: any) {
+      console.error('Error getting project activities:', error)
+      return { success: false, error: error.message }
+    }
+  })
+
+  ipcMain.handle(IPC_CHANNELS.ACTIVITY_GET_GLOBAL, async (_event, limit) => {
+    try {
+      const activities = await activityService.getGlobalFeed(limit)
+      return { success: true, activities }
+    } catch (error: any) {
+      console.error('Error getting global activity feed:', error)
+      return { success: false, error: error.message }
+    }
+  })
+
+  ipcMain.handle(IPC_CHANNELS.ACTIVITY_GET_METRICS, async (_event, projectId) => {
+    try {
+      const metrics = await activityService.getSuccessMetrics(projectId)
+      return { success: true, metrics }
+    } catch (error: any) {
+      console.error('Error getting success metrics:', error)
+      return { success: false, error: error.message }
+    }
+  })
+
+  ipcMain.handle(IPC_CHANNELS.ACTIVITY_LOG, async (_event, activity) => {
+    try {
+      const newActivity = await activityService.logActivity(activity)
+      return { success: true, activity: newActivity }
+    } catch (error: any) {
+      console.error('Error logging activity:', error)
+      return { success: false, error: error.message }
+    }
+  })
+
   console.log('IPC handlers registered')
 }
 
@@ -381,8 +462,18 @@ function setupTestRunnerEvents() {
     sendToRenderer(IPC_CHANNELS.TEST_OUTPUT, data)
   })
 
-  testRunner.on('test:complete', (data) => {
+  testRunner.on('test:complete', async (data) => {
     sendToRenderer(IPC_CHANNELS.TEST_COMPLETE, data)
+
+    // Log activity
+    try {
+      const project = projectManager.getProject(data.projectId)
+      if (project && data.results) {
+        await activityService.onTestComplete(data.projectId, project.name, data.results)
+      }
+    } catch (error) {
+      console.error('Error logging test complete activity:', error)
+    }
   })
 
   testRunner.on('test:error', (data) => {
