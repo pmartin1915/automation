@@ -7,6 +7,27 @@ import { MetricsWidget } from '../components/MetricsWidget'
 import { DropZone } from '../components/DropZone'
 import { SkeletonList } from '../components/SkeletonCard'
 import type { Project } from '../../shared/types'
+import {
+  PackageIcon,
+  TestTubeIcon,
+  CheckCircleIcon,
+  XCircleIcon,
+  QuestionCircleIcon,
+  SpinnerIcon,
+  ChartBarIcon,
+  CopyIcon,
+  RocketIcon,
+  SaveIcon,
+  UploadIcon,
+  DownloadIcon,
+  BranchIcon,
+  EyeIcon,
+  EyeOffIcon,
+  RefreshIcon,
+  ClockIcon,
+  FolderIcon,
+  AlertCircleIcon
+} from '../components/Icons'
 
 function Dashboard() {
   const {
@@ -243,7 +264,7 @@ function Dashboard() {
     if (project.gitStatus) {
       formatted += `## Git Status\n`
       formatted += `- **Branch:** \`${project.gitStatus.branch}\`\n`
-      formatted += `- **Status:** ${project.gitStatus.isDirty ? '⚠️ Uncommitted changes' : '✅ Clean'}\n`
+      formatted += `- **Status:** ${project.gitStatus.isDirty ? '⚠ Uncommitted changes' : '✓ Clean'}\n`
       if (project.gitStatus.ahead > 0) {
         formatted += `- **Ahead:** ${project.gitStatus.ahead} commit(s)\n`
       }
@@ -261,10 +282,10 @@ function Dashboard() {
       formatted += `- **Success Rate:** ${Math.round((testResult.passed / (testResult.passed + testResult.failed)) * 100)}%\n\n`
 
       if (testResult.failed > 0) {
-        formatted += `## ❌ Action Required\n`
+        formatted += `## ✗ Action Required\n`
         formatted += `**${testResult.failed} test(s) are failing. Please fix them.**\n\n`
       } else {
-        formatted += `## ✅ All Tests Passing\n`
+        formatted += `## ✓ All Tests Passing\n`
         formatted += `Great job! All ${testResult.passed} tests are passing.\n\n`
       }
     }
@@ -285,7 +306,7 @@ function Dashboard() {
 
     try {
       await navigator.clipboard.writeText(formatted)
-      toast.success(`📋 Test context copied! Paste into Claude Code`, { duration: 3000 })
+      toast.success(`Test context copied! Paste into Claude Code`, { duration: 3000 })
     } catch (error) {
       console.error('Failed to copy:', error)
       toast.error('Failed to copy to clipboard')
@@ -381,7 +402,9 @@ function Dashboard() {
         <SkeletonList count={3} />
       ) : projects.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-24 text-center">
-          <div className="text-8xl mb-6 animate-bounce">📦</div>
+          <div className="mb-6 animate-bounce text-muted-foreground">
+            <PackageIcon size={80} />
+          </div>
           <h3 className="text-2xl font-bold mb-3 text-foreground">No Projects Yet</h3>
           <p className="text-muted-foreground mb-8 text-lg max-w-md">
             Add your first project to get started, or drag & drop a folder here
@@ -398,22 +421,22 @@ function Dashboard() {
           {projects.map(project => (
             <div
               key={project.id}
-              className="border border-border rounded-xl p-6 bg-card hover:shadow-xl transition-all duration-300 cursor-pointer hover:scale-[1.02] hover:border-primary/30"
+              className="group relative border border-border/50 rounded-2xl p-6 bg-gradient-to-br from-card to-card/80 hover:shadow-2xl hover:shadow-primary/10 transition-all duration-300 cursor-pointer hover:scale-[1.02] hover:border-primary/40 backdrop-blur-sm"
             >
               <div className="flex items-start justify-between mb-5">
                 <div className="flex-1 min-w-0">
                   <h3 className="font-bold text-xl mb-2 text-foreground truncate">{project.name}</h3>
                   <p className="text-xs text-muted-foreground truncate" title={project.path}>{project.path}</p>
                 </div>
-                <div className="text-3xl ml-3 flex-shrink-0">
+                <div className="ml-3 flex-shrink-0">
                   {(() => {
                     const result = testResults.get(project.id)
                     const isRunning = runningTests.has(project.id)
-                    if (isRunning) return '🔄'
-                    if (!result) return '❓'
-                    if (result.failed > 0) return '❌'
-                    if (result.passed > 0) return '✅'
-                    return '❓'
+                    if (isRunning) return <SpinnerIcon size={32} className="text-blue-500" />
+                    if (!result) return <QuestionCircleIcon size={32} className="text-gray-400" />
+                    if (result.failed > 0) return <XCircleIcon size={32} className="text-red-500" />
+                    if (result.passed > 0) return <CheckCircleIcon size={32} className="text-green-500" />
+                    return <QuestionCircleIcon size={32} className="text-gray-400" />
                   })()}
                 </div>
               </div>
@@ -479,7 +502,7 @@ function Dashboard() {
                 {/* Watch Mode Toggle */}
                 <div className="flex items-center justify-between text-sm py-2.5 px-3 bg-accent/30 rounded-lg border border-border">
                   <span className="text-muted-foreground flex items-center gap-2 font-medium">
-                    {project.watchMode ? '👁️' : '⏸️'}
+                    {project.watchMode ? <EyeIcon size={16} /> : <EyeOffIcon size={16} />}
                     Watch Mode
                   </span>
                   <button
@@ -505,16 +528,27 @@ function Dashboard() {
                   <button
                     onClick={() => handleRunTests(project.id)}
                     disabled={runningTests.has(project.id)}
-                    className="flex-1 px-4 py-2.5 text-sm border-2 border-border rounded-lg hover:bg-accent transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed font-medium hover:border-primary/50 hover:shadow-md"
+                    className="flex-1 px-4 py-2.5 text-sm border-2 border-border rounded-lg hover:bg-accent transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed font-medium hover:border-primary/50 hover:shadow-md flex items-center justify-center gap-2"
                   >
-                    {runningTests.has(project.id) ? '⏳ Running...' : '🧪 Run Tests'}
+                    {runningTests.has(project.id) ? (
+                      <>
+                        <ClockIcon size={16} className="animate-pulse" />
+                        Running...
+                      </>
+                    ) : (
+                      <>
+                        <TestTubeIcon size={16} />
+                        Run Tests
+                      </>
+                    )}
                   </button>
                   {testResults.get(project.id) && (
                     <button
                       onClick={() => handleViewResults(project.id)}
-                      className="flex-1 px-4 py-2.5 text-sm bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-all duration-200 font-medium shadow-md hover:shadow-lg"
+                      className="flex-1 px-4 py-2.5 text-sm bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-all duration-200 font-medium shadow-md hover:shadow-lg flex items-center justify-center gap-2"
                     >
-                      📊 Results
+                      <ChartBarIcon size={16} />
+                      Results
                     </button>
                   )}
                 </div>
@@ -528,7 +562,8 @@ function Dashboard() {
                     }}
                     className="w-full px-4 py-2.5 text-sm bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-lg hover:from-green-700 hover:to-emerald-700 transition-all duration-200 font-bold shadow-md hover:shadow-lg hover:scale-[1.02] flex items-center justify-center gap-2"
                   >
-                    📋 Copy for Claude Code
+                    <CopyIcon size={16} />
+                    Copy for Claude Code
                   </button>
                 )}
 
@@ -538,9 +573,10 @@ function Dashboard() {
                     e.stopPropagation()
                     handleLaunchClaude(project.id)
                   }}
-                  className="w-full px-4 py-3 text-sm bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg hover:from-purple-700 hover:to-blue-700 transition-all duration-200 font-bold shadow-lg hover:shadow-xl hover:scale-105"
+                  className="w-full px-4 py-3 text-sm bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg hover:from-purple-700 hover:to-blue-700 transition-all duration-200 font-bold shadow-lg hover:shadow-xl hover:scale-105 flex items-center justify-center gap-2"
                 >
-                  🚀 Launch Claude Code
+                  <RocketIcon size={18} />
+                  Launch Claude Code
                 </button>
 
                 {/* Git Actions */}
@@ -552,9 +588,10 @@ function Dashboard() {
                           e.stopPropagation()
                           handleCommit(project.id)
                         }}
-                        className="px-3 py-2 text-xs border border-border rounded-lg hover:bg-accent transition-all duration-200 font-medium hover:border-primary/30"
+                        className="px-3 py-2 text-xs border border-border rounded-lg hover:bg-accent transition-all duration-200 font-medium hover:border-primary/30 flex items-center justify-center gap-1.5"
                       >
-                        💾 Commit
+                        <SaveIcon size={14} />
+                        Commit
                       </button>
                     )}
                     {project.gitStatus.ahead > 0 && (
@@ -563,9 +600,10 @@ function Dashboard() {
                           e.stopPropagation()
                           handlePush(project)
                         }}
-                        className="px-3 py-2 text-xs border border-border rounded-lg hover:bg-accent transition-all duration-200 font-medium hover:border-primary/30"
+                        className="px-3 py-2 text-xs border border-border rounded-lg hover:bg-accent transition-all duration-200 font-medium hover:border-primary/30 flex items-center justify-center gap-1.5"
                       >
-                        ⬆️ Push
+                        <UploadIcon size={14} />
+                        Push
                       </button>
                     )}
                     {project.gitStatus.behind > 0 && (
@@ -574,9 +612,10 @@ function Dashboard() {
                           e.stopPropagation()
                           handlePull(project)
                         }}
-                        className="px-3 py-2 text-xs border border-border rounded-lg hover:bg-accent transition-all duration-200 font-medium hover:border-primary/30"
+                        className="px-3 py-2 text-xs border border-border rounded-lg hover:bg-accent transition-all duration-200 font-medium hover:border-primary/30 flex items-center justify-center gap-1.5"
                       >
-                        ⬇️ Pull
+                        <DownloadIcon size={14} />
+                        Pull
                       </button>
                     )}
                     <button
@@ -584,9 +623,10 @@ function Dashboard() {
                         e.stopPropagation()
                         handleManageBranches(project.id)
                       }}
-                      className="px-3 py-2 text-xs border border-border rounded-lg hover:bg-accent transition-all duration-200 font-medium hover:border-primary/30"
+                      className="px-3 py-2 text-xs border border-border rounded-lg hover:bg-accent transition-all duration-200 font-medium hover:border-primary/30 flex items-center justify-center gap-1.5"
                     >
-                      🌿 Branch
+                      <BranchIcon size={14} />
+                      Branch
                     </button>
                   </div>
                 )}
@@ -1175,7 +1215,10 @@ function AddProjectFromDropModal({ folderData, onClose, onProjectAdded }: {
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
       <div className="bg-card border border-border rounded-lg p-6 w-full max-w-md">
-        <h2 className="text-xl font-semibold mb-4">📁 Add Project from Folder</h2>
+        <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+          <FolderIcon size={24} />
+          Add Project from Folder
+        </h2>
         <p className="text-sm text-muted-foreground mb-4">
           We've detected the following project settings. You can adjust them before adding.
         </p>

@@ -1,4 +1,5 @@
 import { useState, useCallback, DragEvent } from 'react'
+import { FolderIcon } from './Icons'
 
 interface DropZoneProps {
   onDrop: (paths: string[]) => void
@@ -77,11 +78,15 @@ export function DropZone({ onDrop, children, overlay = true }: DropZoneProps) {
 
       {/* Drag Overlay */}
       {overlay && isDragging && (
-        <div className="absolute inset-0 z-50 flex items-center justify-center bg-background/95 border-4 border-dashed border-primary rounded-lg">
+        <div className="absolute inset-0 z-50 flex items-center justify-center bg-gradient-to-br from-background/98 via-primary/10 to-background/98 border-4 border-dashed border-primary/60 rounded-2xl backdrop-blur-md animate-pulse">
           <div className="text-center">
-            <div className="text-6xl mb-4">📁</div>
-            <h3 className="text-2xl font-semibold mb-2">Drop folder here</h3>
-            <p className="text-muted-foreground">
+            <div className="mb-6 flex justify-center text-primary">
+              <FolderIcon size={80} className="animate-bounce" />
+            </div>
+            <h3 className="text-2xl font-bold mb-2 bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent">
+              Drop folder here
+            </h3>
+            <p className="text-muted-foreground font-medium">
               Release to add project to automation platform
             </p>
           </div>
