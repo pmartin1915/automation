@@ -162,7 +162,18 @@ function App() {
 
           {/* Add Project Button */}
           <div className="mt-8">
-            <button className="w-full px-4 py-3.5 border-2 border-dashed border-border/60 rounded-xl hover:border-primary hover:bg-accent/50 transition-all duration-200 text-sm font-semibold hover:shadow-lg hover:scale-105 group flex items-center justify-center gap-2 text-foreground/70 hover:text-foreground">
+            <button
+              onClick={() => {
+                setCurrentPage('dashboard')
+                // Scroll to top of dashboard to show add project area
+                setTimeout(() => {
+                  const main = document.querySelector('main')
+                  if (main) main.scrollTop = 0
+                }, 100)
+              }}
+              className="w-full px-4 py-3.5 border-2 border-dashed border-border/60 rounded-xl hover:border-primary hover:bg-accent/50 transition-all duration-200 text-sm font-semibold hover:shadow-lg hover:scale-105 group flex items-center justify-center gap-2 text-foreground/70 hover:text-foreground"
+              title="Go to Dashboard to add a project"
+            >
               <PlusIcon size={16} className="group-hover:scale-110 group-hover:rotate-90 transition-all duration-200" />
               <span>Add Project</span>
             </button>

@@ -1,4 +1,5 @@
 import { useKeyboardShortcuts, type KeyboardShortcut } from '../hooks/useKeyboardShortcuts'
+import { KeyboardIcon } from './Icons'
 
 interface KeyboardShortcutsModalProps {
   shortcuts: KeyboardShortcut[]
@@ -21,16 +22,21 @@ export function KeyboardShortcutsModal({ shortcuts, onClose }: KeyboardShortcuts
   const categories = Object.keys(groupedShortcuts).sort()
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-card border border-border rounded-lg w-full max-w-2xl max-h-[80vh] flex flex-col">
+    <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
+      <div className="bg-background border border-border rounded-xl w-full max-w-2xl max-h-[80vh] flex flex-col shadow-2xl">
         {/* Header */}
         <div className="p-6 border-b border-border">
           <div className="flex items-start justify-between">
-            <div>
-              <h2 className="text-xl font-semibold mb-1">⌨️ Keyboard Shortcuts</h2>
-              <p className="text-sm text-muted-foreground">
-                Master these shortcuts to speed up your workflow
-              </p>
+            <div className="flex items-center gap-3">
+              <div className="text-primary">
+                <KeyboardIcon size={24} />
+              </div>
+              <div>
+                <h2 className="text-xl font-semibold mb-1">Keyboard Shortcuts</h2>
+                <p className="text-sm text-muted-foreground">
+                  Master these shortcuts to speed up your workflow
+                </p>
+              </div>
             </div>
             <button
               onClick={onClose}
